@@ -1,0 +1,170 @@
+### Users
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "admin": false,
+  "password": "123456"
+}
+
+###
+PUT http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+  "name": "João Santos",
+  "email": "joao.santos@email.com",
+  "admin": true,
+  "password": "newpass"
+}
+
+###
+PATCH http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+  "admin": true
+}
+
+###
+DELETE http://localhost:3000/users/1
+
+### Products
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+  "name": "Notebook Dell",
+  "EAN": "7891234567890",
+  "price": 2500.00,
+  "description": "Notebook Dell Inspiron",
+  "categoryId": 1
+}
+
+###
+PUT http://localhost:3000/products/1
+Content-Type: application/json
+
+{
+  "name": "Notebook Dell XPS",
+  "EAN": "7891234567890",
+  "price": 3500.00,
+  "description": "Notebook Dell XPS 13",
+  "categoryId": 1
+}
+
+###
+PATCH http://localhost:3000/products/1
+Content-Type: application/json
+
+{
+  "price": 3000.00
+}
+
+###
+DELETE http://localhost:3000/products/1
+
+### Categories
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+  "name": "Eletrônicos",
+  "description": "Produtos eletrônicos"
+}
+
+###
+PUT http://localhost:3000/categories/1
+Content-Type: application/json
+
+{
+  "name": "Informática",
+  "description": "Produtos de informática"
+}
+
+###
+PATCH http://localhost:3000/categories/1
+Content-Type: application/json
+
+{
+  "description": "Equipamentos de informática"
+}
+
+###
+DELETE http://localhost:3000/categories/1
+
+### Sales
+POST http://localhost:3000/sales
+Content-Type: application/json
+
+{
+  "value": 2500.00,
+  "discount": 100.00,
+  "productid": 1,
+  "ClientId": 1
+}
+
+###
+PUT http://localhost:3000/sales/1
+Content-Type: application/json
+
+{
+  "value": 3000.00,
+  "discount": 200.00,
+  "productid": 1,
+  "ClientId": 1
+}
+
+###
+PATCH http://localhost:3000/sales/1
+Content-Type: application/json
+
+{
+  "discount": 150.00
+}
+
+###
+DELETE http://localhost:3000/sales/1
+
+### Clients
+POST http://localhost:3000/clients
+Content-Type: application/json
+
+{
+  "name": "Maria Silva",
+  "cpf": "12345678901",
+  "email": "maria@email.com",
+  "adress": "Rua das Flores, 123",
+  "zipcode": "01234-567",
+  "number": "123",
+  "city": "São Paulo",
+  "state": "SP"
+}
+
+###
+PUT http://localhost:3000/clients/1
+Content-Type: application/json
+
+{
+  "name": "Maria Santos",
+  "cpf": "12345678901",
+  "email": "maria.santos@email.com",
+  "adress": "Av. Paulista, 456",
+  "zipcode": "01310-100",
+  "number": "456",
+  "city": "São Paulo",
+  "state": "SP"
+}
+
+###
+PATCH http://localhost:3000/clients/1
+Content-Type: application/json
+
+{
+  "email": "maria.nova@email.com"
+}
+
+###
+DELETE http://localhost:3000/clients/1
