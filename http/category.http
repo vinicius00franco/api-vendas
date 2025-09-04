@@ -1,0 +1,28 @@
+### Categories
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+  "name": "Eletrônicos",
+  "description": "Produtos eletrônicos"
+}
+
+###
+PUT http://localhost:3000/categories/1
+Content-Type: application/json
+
+{
+  "name": "Informática",
+  "description": "Produtos de informática"
+}
+
+###
+PATCH http://localhost:3000/categories/1
+Content-Type: application/json
+
+{
+  "description": "Equipamentos de informática"
+}
+
+###
+DELETE http://localhost:3000/categories/1

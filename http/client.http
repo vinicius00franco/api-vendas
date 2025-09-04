@@ -1,0 +1,40 @@
+### Clients
+POST http://localhost:3000/clients
+Content-Type: application/json
+
+{
+  "name": "Maria Silva",
+  "cpf": "12345678901",
+  "email": "maria@email.com",
+  "address": "Rua das Flores, 123",
+  "zipCode": "01234-567",
+  "number": "123",
+  "city": "São Paulo",
+  "state": "SP"
+}
+
+###
+PUT http://localhost:3000/clients/1
+Content-Type: application/json
+
+{
+  "name": "Maria Santos",
+  "cpf": "12345678901",
+  "email": "maria.santos@email.com",
+  "address": "Av. Paulista, 456",
+  "zipCode": "01310-100",
+  "number": "456",
+  "city": "São Paulo",
+  "state": "SP"
+}
+
+###
+PATCH http://localhost:3000/clients/1
+Content-Type: application/json
+
+{
+  "email": "maria.nova@email.com"
+}
+
+###
+DELETE http://localhost:3000/clients/1

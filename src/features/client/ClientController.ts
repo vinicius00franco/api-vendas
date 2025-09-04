@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 
 class ClientController {
   async create(request: Request, response: Response) {
-    const { name, cpf, email, adress, zipcode, number, city, state } = request.body;
-    const client = { name, cpf, email, adress, zipcode, number, city, state };
+    const { name, cpf, email, address, zipCode, number, city, state } = request.body;
+    const client = { name, cpf, email, address, zipCode, number, city, state };
     response.json({ message: "Cliente incluído com sucesso" });
   }
 
   async update(request: Request, response: Response) {
     const { id } = request.params;
-    const { name, cpf, email, adress, zipcode, number, city, state } = request.body;
+    const { name, cpf, email, address, zipCode, number, city, state } = request.body;
     response.json({ message: "Cliente atualizado com sucesso", id });
   }
 

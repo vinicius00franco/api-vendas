@@ -1,0 +1,34 @@
+### Products
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+  "name": "Notebook Dell",
+  "EAN": "7891234567890",
+  "price": 2500.00,
+  "description": "Notebook Dell Inspiron",
+  "categoryId": 1
+}
+
+###
+PUT http://localhost:3000/products/1
+Content-Type: application/json
+
+{
+  "name": "Notebook Dell XPS",
+  "EAN": "7891234567890",
+  "price": 3500.00,
+  "description": "Notebook Dell XPS 13",
+  "categoryId": 1
+}
+
+###
+PATCH http://localhost:3000/products/1
+Content-Type: application/json
+
+{
+  "price": 3000.00
+}
+
+###
+DELETE http://localhost:3000/products/1

@@ -1,0 +1,32 @@
+### Sales
+POST http://localhost:3000/sales
+Content-Type: application/json
+
+{
+  "value": 2500.00,
+  "discount": 100.00,
+  "productId": 1,
+  "clientId": 1
+}
+
+###
+PUT http://localhost:3000/sales/1
+Content-Type: application/json
+
+{
+  "value": 3000.00,
+  "discount": 200.00,
+  "productId": 1,
+  "clientId": 1
+}
+
+###
+PATCH http://localhost:3000/sales/1
+Content-Type: application/json
+
+{
+  "discount": 150.00
+}
+
+###
+DELETE http://localhost:3000/sales/1

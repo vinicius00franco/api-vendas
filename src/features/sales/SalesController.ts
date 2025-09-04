@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 
 class SalesController {
   async create(request: Request, response: Response) {
-    const { value, discount, productid, ClientId } = request.body;
-    const sales = { value, discount, productid, ClientId };
+    const { value, discount, productId, clientId } = request.body;
+    const sales = { value, discount, productId, clientId };
     response.json({ message: "Venda incluída com sucesso" });
   }
 
   async update(request: Request, response: Response) {
     const { id } = request.params;
-    const { value, discount, productid, ClientId } = request.body;
+    const { value, discount, productId, clientId } = request.body;
     response.json({ message: "Venda atualizada com sucesso", id });
   }
 

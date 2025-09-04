@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { UserController } from "./controller/user/UserController";
-import { ProductController } from "./controller/product/ProductController";
-import { CategoryController } from "./controller/category/CategoryController";
-import { SalesController } from "./controller/sales/SalesController";
-import { ClientController } from "./controller/client/ClientController";
+import { UserController } from "./features/user/index.js";
+import { ProductController } from "./features/product/index.js";
+import { CategoryController } from "./features/category/index.js";
+import { SalesController } from "./features/sales/index.js";
+import { ClientController } from "./features/client/index.js";
 
 const userController = new UserController();
 const productController = new ProductController();

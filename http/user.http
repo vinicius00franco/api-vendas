@@ -1,0 +1,32 @@
+### Users
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "admin": false,
+  "password": "123456"
+}
+
+###
+PUT http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+  "name": "João Santos",
+  "email": "joao.santos@email.com",
+  "admin": true,
+  "password": "newpass"
+}
+
+###
+PATCH http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+  "admin": true
+}
+
+###
+DELETE http://localhost:3000/users/1
