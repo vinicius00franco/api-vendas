@@ -1,107 +1,72 @@
 import { type Request } from "express";
-import { validationError, validationSuccess, type ValidationResult } from "../../shared/dto/validation.js";
+import { BaseRequestDto, type RequestBody, type RequestParams } from "../../shared/dto/BaseRequestDto.js";
+import { type ValidationResult } from "../../shared/dto/validation.js";
 import { type CreateCategoryInput, type UpdateCategoryInput } from "./CategoryService.js";
 
-type CategoryBody = Record<string, unknown>;
-
-type CategoryParams = {
-  id?: string;
-};
-
-class CategoryRequestDto {
-  private constructor(private readonly body: CategoryBody, private readonly params: CategoryParams) {}
+class CategoryRequestDto extends BaseRequestDto {
+  private constructor(body: RequestBody, params: RequestParams) {
+    super(body, params);
+  }
 
   static fromRequest(request: Request): CategoryRequestDto {
-    const body: CategoryBody = typeof request.body === "object" && request.body !== null ? request.body : {};
-    return new CategoryRequestDto(body, request.params ?? {});
+    const body = this.extractBody(request);
+    const params = this.extractParams(request);
+    return new CategoryRequestDto(body, params);
   }
 
   getId(): ValidationResult<number> {
-    const rawId = this.params.id;
-    if (!rawId) {
-      return validationError("Identificador da categoria não informado");
-    }
-
-    const parsedId = Number(rawId);
-    if (!Number.isInteger(parsedId) || parsedId <= 0) {
-      return validationError("Identificador da categoria inválido");
-    }
-
-    return validationSuccess(parsedId);
+    return this.requireIdParam("id", {
+      missing: "Identificador da categoria não informado",
+      invalid: "Identificador da categoria inválido",
+    });
   }
 
   toCreateInput(): ValidationResult<CreateCategoryInput> {
-    const name = this.parseString(this.body.name);
-    if (!name) {
-      return validationError("Nome da categoria é obrigatório");
+    const nameResult = this.requireString(this.firstValue("name"), "Nome da categoria é obrigatório");
+    if (!nameResult.success) {
+      return nameResult;
     }
 
-    const description = this.parseNullableString(this.body.description);
+    const description = this.optionalNullableString(this.firstValue("description"));
 
     const createInput: CreateCategoryInput = {
-      name,
+      name: nameResult.data,
     };
 
     if (description !== undefined) {
       createInput.description = description;
     }
 
-    return validationSuccess(createInput);
+    return this.success(createInput);
   }
 
   toUpdateInput(): ValidationResult<UpdateCategoryInput> {
     const update: UpdateCategoryInput = {};
 
-    if (this.hasField("name")) {
-      const name = this.parseString(this.body.name);
-      if (!name) {
-        return validationError("Nome da categoria inválido");
+    if (this.hasAnyField("name")) {
+      const nameResult = this.validateStringIfPresent(this.firstValue("name"), {
+        invalid: "Nome da categoria inválido",
+      });
+      if (!nameResult.success) {
+        return nameResult;
       }
-      update.name = name;
+      if (nameResult.data !== undefined) {
+        update.name = nameResult.data;
+      }
     }
 
-    if (this.hasField("description")) {
-      const description = this.parseNullableString(this.body.description);
+    if (this.hasAnyField("description")) {
+      const description = this.optionalNullableString(this.firstValue("description"));
       if (description !== undefined) {
         update.description = description;
       }
     }
 
     if (Object.keys(update).length === 0) {
-      return validationError("Nenhum dado informado para atualização");
+      return this.error("Nenhum dado informado para atualização");
     }
 
-    return validationSuccess(update);
-  }
-
-  private parseString(value: unknown): string | null {
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      return trimmed.length > 0 ? trimmed : null;
-    }
-
-    return null;
-  }
-
-  private parseNullableString(value: unknown): string | null | undefined {
-    if (value === undefined) {
-      return undefined;
-    }
-
-    if (value === null) {
-      return null;
-    }
-
-    const parsed = this.parseString(value);
-    if (parsed === null) {
-      return null;
-    }
-
-    return parsed;
-  }
-
-  private hasField(field: string): boolean {
-    return Object.prototype.hasOwnProperty.call(this.body, field);
+    return this.success(update);
   }
 }
 
