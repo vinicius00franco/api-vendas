@@ -1,19 +1,19 @@
 import { Request, Response } from "express";
-import { UserService, type UpdateUserInput } from "./UserService.js";
+import { UserService } from "./UserService.js";
+import { UserRequestDto } from "./UserRequestDto.js";
 
 class UserController {
   private readonly userService = new UserService();
 
   async create(request: Request, response: Response) {
-    const { name, email, admin, password } = request.body;
-
     try {
-      const user = await this.userService.create({
-        name,
-        email,
-        password,
-        isAdmin: Boolean(admin),
-      });
+      const dto = UserRequestDto.fromRequest(request);
+      const payload = dto.toCreateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
+      }
+
+      const user = await this.userService.create(payload.data);
 
       return response.status(201).json(user);
     } catch (error) {
@@ -22,17 +22,19 @@ class UserController {
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params;
-    const { name, email, admin, password } = request.body;
-
     try {
-      const payload: UpdateUserInput = {};
-      if (name !== undefined) payload.name = name;
-      if (email !== undefined) payload.email = email;
-      if (password !== undefined) payload.password = password;
-      if (admin !== undefined) payload.isAdmin = Boolean(admin);
+      const dto = UserRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+      }
 
-      const user = await this.userService.update(Number(id), payload);
+      const payload = dto.toUpdateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
+      }
+
+      const user = await this.userService.update(idResult.data, payload.data);
 
       return response.json(user);
     } catch (error) {
@@ -41,9 +43,14 @@ class UserController {
   }
 
   async delete(request: Request, response: Response) {
-    const { id } = request.params;
     try {
-      await this.userService.delete(Number(id));
+      const dto = UserRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+      }
+
+      await this.userService.delete(idResult.data);
       return response.status(204).send();
     } catch (error) {
       return response.status(404).json({ message: (error as Error).message });
@@ -51,17 +58,19 @@ class UserController {
   }
 
   async patch(request: Request, response: Response) {
-    const { id } = request.params;
-    const updates = request.body;
     try {
-      const payload: UpdateUserInput = {};
-      if (updates.name !== undefined) payload.name = updates.name;
-      if (updates.email !== undefined) payload.email = updates.email;
-      if (updates.password !== undefined) payload.password = updates.password;
-      if (updates.admin !== undefined) payload.isAdmin = Boolean(updates.admin);
-      if (updates.isAdmin !== undefined) payload.isAdmin = Boolean(updates.isAdmin);
+      const dto = UserRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+      }
 
-      const user = await this.userService.update(Number(id), payload);
+      const payload = dto.toUpdateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
+      }
+
+      const user = await this.userService.update(idResult.data, payload.data);
 
       return response.json(user);
     } catch (error) {

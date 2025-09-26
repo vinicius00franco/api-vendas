@@ -1,20 +1,19 @@
 import { Request, Response } from "express";
-import { CategoryService, type UpdateCategoryInput } from "./CategoryService.js";
+import { CategoryService } from "./CategoryService.js";
+import { CategoryRequestDto } from "./CategoryRequestDto.js";
 
 class CategoryController {
   private readonly categoryService = new CategoryService();
 
   async create(request: Request, response: Response) {
-    const { name, description } = request.body;
     try {
-      if (!name) {
-        return response.status(400).json({ message: "Nome da categoria é obrigatório" });
+      const dto = CategoryRequestDto.fromRequest(request);
+      const payload = dto.toCreateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
       }
 
-      const category = await this.categoryService.create({
-        name,
-        description,
-      });
+      const category = await this.categoryService.create(payload.data);
 
       return response.status(201).json(category);
     } catch (error) {
@@ -23,18 +22,19 @@ class CategoryController {
   }
 
   async update(request: Request, response: Response) {
-    const { id } = request.params;
-    const { name, description } = request.body;
     try {
-      const payload: UpdateCategoryInput = {};
-      if (name !== undefined) payload.name = name;
-      if (description !== undefined) payload.description = description;
-
-      if (Object.keys(payload).length === 0) {
-        return response.status(400).json({ message: "Nenhum dado informado para atualização" });
+      const dto = CategoryRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
       }
 
-      const category = await this.categoryService.update(Number(id), payload);
+      const payload = dto.toUpdateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
+      }
+
+      const category = await this.categoryService.update(idResult.data, payload.data);
       return response.json(category);
     } catch (error) {
       return response.status(400).json({ message: (error as Error).message });
@@ -42,9 +42,14 @@ class CategoryController {
   }
 
   async delete(request: Request, response: Response) {
-    const { id } = request.params;
     try {
-      await this.categoryService.delete(Number(id));
+      const dto = CategoryRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+      }
+
+      await this.categoryService.delete(idResult.data);
       return response.status(204).send();
     } catch (error) {
       return response.status(404).json({ message: (error as Error).message });
@@ -52,18 +57,19 @@ class CategoryController {
   }
 
   async patch(request: Request, response: Response) {
-    const { id } = request.params;
-    const updates = request.body;
     try {
-      const payload: UpdateCategoryInput = {};
-      if (updates.name !== undefined) payload.name = updates.name;
-      if (updates.description !== undefined) payload.description = updates.description;
-
-      if (Object.keys(payload).length === 0) {
-        return response.status(400).json({ message: "Nenhum dado informado para atualização" });
+      const dto = CategoryRequestDto.fromRequest(request);
+      const idResult = dto.getId();
+      if (!idResult.success) {
+        return response.status(idResult.status ?? 400).json({ message: idResult.message });
       }
 
-      const category = await this.categoryService.update(Number(id), payload);
+      const payload = dto.toUpdateInput();
+      if (!payload.success) {
+        return response.status(payload.status ?? 400).json({ message: payload.message });
+      }
+
+      const category = await this.categoryService.update(idResult.data, payload.data);
       return response.json(category);
     } catch (error) {
       return response.status(400).json({ message: (error as Error).message });
