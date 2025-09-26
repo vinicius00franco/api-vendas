@@ -1,5 +1,6 @@
 import { type Response } from "express";
 import { type ValidationResult } from "../dto/validation.js";
+import { ErrorCodes, codeForStatus } from "./ErrorCodes.js";
 
 type SuccessOptions<T> = {
   status?: number;
@@ -50,9 +51,7 @@ class JsonResponse {
     const { status = 400, code, details } = options;
     const payload: Record<string, unknown> = { message };
 
-    if (code) {
-      payload.code = code;
-    }
+    payload.code = code ?? codeForStatus(status);
 
     if (details !== undefined) {
       payload.details = details;
@@ -65,7 +64,7 @@ class JsonResponse {
     if (!result.success) {
       return this.error(
         result.message,
-        result.status !== undefined ? { status: result.status } : {}
+        result.status !== undefined ? { status: result.status, code: ErrorCodes.VALIDATION_ERROR } : { code: ErrorCodes.VALIDATION_ERROR }
       );
     }
 
