@@ -1,0 +1,60 @@
+@startuml schema
+entity categories {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity products {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  ean : VARCHAR
+  price : DECIMAL(12,2)
+  description : TEXT
+  category_id : BIGINT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity clients {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  document : VARCHAR
+  email : VARCHAR
+  phone : VARCHAR
+  address : JSONB
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity users {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  email : VARCHAR
+  password_hash : VARCHAR
+  is_admin : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity sales {
+  * id : BIGSERIAL
+  uuid : UUID
+  value : DECIMAL(12,2)
+  discount : DECIMAL(12,2)
+  product_id : BIGINT
+  client_id : BIGINT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+categories ||--o{ products : "category_id"
+products ||--o{ sales : "product_id"
+clients ||--o{ sales : "client_id"
+@enduml

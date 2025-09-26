@@ -1,0 +1,175 @@
+@startuml schema-enterprise-model
+!theme vibrant
+skinparam linetype ortho
+skinparam shadowing false
+skinparam RoundCorner 7
+
+' -- PRODUCT & CATALOG --
+entity categories {
+  * id : BIGSERIAL
+  uuid : UUID
+  parent_id : BIGINT <<FK>>
+  name : VARCHAR
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity brands {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity products {
+  * id : BIGSERIAL
+  uuid : UUID
+  category_id : BIGINT <<FK>>
+  brand_id : BIGINT <<FK>>
+  name : VARCHAR
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity product_variants {
+  * id : BIGSERIAL
+  uuid : UUID
+  product_id : BIGINT <<FK>>
+  sku : VARCHAR
+  ean : VARCHAR
+  price : DECIMAL(12,2)
+  stock_quantity: INT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+' -- CLIENT & INHERITANCE --
+entity clients {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  email : VARCHAR
+  phone : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity person_details {
+  * client_id : BIGINT <<PK, FK>>
+  cpf : VARCHAR(11)
+  birth_date : DATE
+}
+
+entity company_details {
+  * client_id : BIGINT <<PK, FK>>
+  cnpj : VARCHAR(14)
+  legal_name : VARCHAR
+}
+
+' -- ORDERS --
+entity orders {
+  * id : BIGSERIAL
+  uuid : UUID
+  client_id : BIGINT <<FK>>
+  order_status_id : INT <<FK>>
+  total_value : DECIMAL(12,2)
+  total_discount : DECIMAL(12,2)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity order_items {
+  * id : BIGSERIAL
+  order_id : BIGINT <<FK>>
+  variant_id : BIGINT <<FK>>
+  quantity : INT
+  unit_price : DECIMAL(12,2)
+  discount : DECIMAL(12,2)
+}
+
+' -- USERS & RBAC --
+entity users {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  email : VARCHAR
+  password_hash : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+entity roles {
+  * id : SERIAL
+  name : VARCHAR(50)
+}
+entity user_roles {
+  * user_id : BIGINT <<FK>>
+  * role_id : INT <<FK>>
+}
+
+' -- ADDRESS & GEOGRAPHY (Lookup Tables) --
+entity addresses {
+  * id : BIGSERIAL
+  client_id : BIGINT <<FK>>
+  city_id : BIGINT <<FK>>
+  address_type_id : INT <<FK>>
+  street : VARCHAR
+  number : VARCHAR
+  complement : VARCHAR
+  neighborhood : VARCHAR
+  zip_code : VARCHAR(9)
+}
+
+entity cities {
+  * id : SERIAL
+  state_id : INT <<FK>>
+  name : VARCHAR
+}
+
+entity states {
+  * id : SERIAL
+  name : VARCHAR
+  uf : VARCHAR(2)
+}
+
+entity address_types {
+  * id : SERIAL
+  name : VARCHAR(50)
+}
+
+entity order_statuses {
+  * id : SERIAL
+  name : VARCHAR(50)
+  description : TEXT
+}
+
+' -- RELATIONSHIPS --
+' Product Relationships
+categories }o--|| categories : "parent_id"
+categories ||--o{ products : "category_id"
+brands ||--o{ products : "brand_id"
+products ||--o{ product_variants : "product_id"
+
+' Client Inheritance Relationships (1-to-1)
+clients ||--|{ person_details : "client_id"
+clients ||--|{ company_details : "client_id"
+
+' Order Relationships
+clients ||--o{ orders : "client_id"
+orders }o--|| order_items : "order_id"
+product_variants }o--|| order_items : "variant_id"
+order_statuses ||--o{ orders : "order_status_id"
+
+' User RBAC Relationships (Many-to-Many)
+users }o--|| user_roles : "user_id"
+roles }o--|| user_roles : "role_id"
+
+' Address Relationships
+clients ||--o{ addresses : "client_id"
+cities ||--o{ addresses : "city_id"
+states ||--o{ cities : "state_id"
+address_types ||--o{ addresses : "address_type_id"
+
+@enduml

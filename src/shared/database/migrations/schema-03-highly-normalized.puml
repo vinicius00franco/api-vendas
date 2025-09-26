@@ -1,0 +1,131 @@
+@startuml schema-highly-normalized
+skinparam linetype ortho
+
+' -- Core Product Tables --
+entity categories {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity brands {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity products {
+  * id : BIGSERIAL
+  uuid : UUID
+  category_id : BIGINT
+  brand_id : BIGINT
+  name : VARCHAR
+  ean : VARCHAR
+  price : DECIMAL(12,2)
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+' -- Core Client & Address Tables --
+entity clients {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  document : VARCHAR
+  email : VARCHAR
+  phone : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity addresses {
+  * id : BIGSERIAL
+  uuid : UUID
+  client_id : BIGINT
+  city_id : INT
+  address_type_id : INT
+  street : VARCHAR
+  number : VARCHAR
+  complement : VARCHAR
+  neighborhood : VARCHAR
+  zip_code : VARCHAR(9)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+' -- Core Order Tables --
+entity orders {
+  * id : BIGSERIAL
+  uuid : UUID
+  client_id : BIGINT
+  order_status_id : INT
+  total_value : DECIMAL(12,2)
+  total_discount : DECIMAL(12,2)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity order_items {
+  * id : BIGSERIAL
+  order_id : BIGINT
+  product_id : BIGINT
+  quantity : INT
+  unit_price : DECIMAL(12,2)
+  discount : DECIMAL(12,2)
+}
+
+' -- Lookup Tables --
+entity states {
+  * id : SERIAL
+  name : VARCHAR(100)
+  uf : CHAR(2)
+}
+
+entity cities {
+  * id : SERIAL
+  state_id : INT
+  name : VARCHAR(255)
+}
+
+entity address_types {
+  * id : SERIAL
+  name : VARCHAR(50)
+}
+
+entity order_statuses {
+  * id : SERIAL
+  name : VARCHAR(50)
+  description : TEXT
+}
+
+' -- Auth Table --
+entity users {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  email : VARCHAR
+  password_hash : VARCHAR
+  is_admin : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+' -- Relationships --
+categories ||--o{ products : "category_id"
+brands ||--o{ products : "brand_id"
+clients ||--o{ addresses : "client_id"
+clients ||--o{ orders : "client_id"
+states ||--o{ cities : "state_id"
+cities ||--o{ addresses : "city_id"
+address_types ||--o{ addresses : "address_type_id"
+order_statuses ||--o{ orders : "order_status_id"
+orders }o--|| order_items : "order_id"
+products }o--|| order_items : "product_id"
+
+@enduml

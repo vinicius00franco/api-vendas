@@ -1,0 +1,89 @@
+@startuml schema-normalized
+skinparam linetype ortho
+
+entity categories {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity products {
+  * id : BIGSERIAL
+  uuid : UUID
+  category_id : BIGINT
+  name : VARCHAR
+  ean : VARCHAR
+  price : DECIMAL(12,2)
+  description : TEXT
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity clients {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  document : VARCHAR
+  email : VARCHAR
+  phone : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity addresses {
+  * id : BIGSERIAL
+  uuid : UUID
+  client_id : BIGINT
+  street : VARCHAR
+  number : VARCHAR
+  complement : VARCHAR
+  neighborhood : VARCHAR
+  city : VARCHAR
+  state : CHAR(2)
+  zip_code : VARCHAR(9)
+  type : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity users {
+  * id : BIGSERIAL
+  uuid : UUID
+  name : VARCHAR
+  email : VARCHAR
+  password_hash : VARCHAR
+  is_admin : BOOLEAN
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity orders {
+  * id : BIGSERIAL
+  uuid : UUID
+  client_id : BIGINT
+  total_value : DECIMAL(12,2)
+  total_discount : DECIMAL(12,2)
+  status : VARCHAR
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity order_items {
+  * id : BIGSERIAL
+  order_id : BIGINT
+  product_id : BIGINT
+  quantity : INT
+  unit_price : DECIMAL(12,2)
+  discount : DECIMAL(12,2)
+}
+
+
+categories ||--o{ products : "category_id"
+clients ||--o{ addresses : "client_id"
+clients ||--o{ orders : "client_id"
+orders }o--|| order_items : "order_id"
+products }o--|| order_items : "product_id"
+@enduml
