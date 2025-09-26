@@ -1,5 +1,25 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
+### Auth - Login (sets {{authToken}})
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "password": "123456"
+}
+
+> {% 
+  client.test("store auth token", function() {
+    const body = response.body;
+    client.assert(body && body.data && body.data.token, "Token não retornado em data.token");
+    client.global.set("authToken", body.data.token);
+  });
+%}
+
 ### Users
-POST http://localhost:3000/users
+POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
@@ -10,8 +30,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/users/1
+PUT {{baseUrl}}/users/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "João Santos",
@@ -21,54 +42,61 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/users/1
+PATCH {{baseUrl}}/users/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "admin": true
 }
 
 ###
-DELETE http://localhost:3000/users/1
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{authToken}}
 
 ### Products
-POST http://localhost:3000/products
+POST {{baseUrl}}/products
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Notebook Dell",
-  "EAN": "7891234567890",
+  "ean": "7891234567890",
   "price": 2500.00,
   "description": "Notebook Dell Inspiron",
   "categoryId": 1
 }
 
 ###
-PUT http://localhost:3000/products/1
+PUT {{baseUrl}}/products/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Notebook Dell XPS",
-  "EAN": "7891234567890",
+  "ean": "7891234567890",
   "price": 3500.00,
   "description": "Notebook Dell XPS 13",
   "categoryId": 1
 }
 
 ###
-PATCH http://localhost:3000/products/1
+PATCH {{baseUrl}}/products/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "price": 3000.00
 }
 
 ###
-DELETE http://localhost:3000/products/1
+DELETE {{baseUrl}}/products/1
+Authorization: Bearer {{authToken}}
 
 ### Categories
-POST http://localhost:3000/categories
+POST {{baseUrl}}/categories
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Eletrônicos",
@@ -76,8 +104,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/categories/1
+PUT {{baseUrl}}/categories/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Informática",
@@ -85,19 +114,22 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/categories/1
+PATCH {{baseUrl}}/categories/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "description": "Equipamentos de informática"
 }
 
 ###
-DELETE http://localhost:3000/categories/1
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{authToken}}
 
 ### Sales
-POST http://localhost:3000/sales
+POST {{baseUrl}}/sales
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "value": 2500.00,
@@ -107,8 +139,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/sales/1
+PUT {{baseUrl}}/sales/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "value": 3000.00,
@@ -118,53 +151,71 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/sales/1
+PATCH {{baseUrl}}/sales/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "discount": 150.00
 }
 
 ###
-DELETE http://localhost:3000/sales/1
+DELETE {{baseUrl}}/sales/1
+Authorization: Bearer {{authToken}}
 
 ### Clients
-POST http://localhost:3000/clients
+POST {{baseUrl}}/clients
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Maria Silva",
-  "cpf": "12345678901",
+  "document": "12345678901",
   "email": "maria@email.com",
-  "address": "Rua das Flores, 123",
-  "zipCode": "01234-567",
-  "number": "123",
-  "city": "São Paulo",
-  "state": "SP"
+  "phone": "+55 11 99999-9999",
+  "address": {
+    "street": "Rua das Flores",
+    "number": "123",
+    "city": "São Paulo",
+    "state": "SP",
+    "postalCode": "01234-567",
+    "country": "BR"
+  }
 }
 
 ###
-PUT http://localhost:3000/clients/1
+PUT {{baseUrl}}/clients/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Maria Santos",
-  "cpf": "12345678901",
+  "document": "12345678901",
   "email": "maria.santos@email.com",
-  "address": "Av. Paulista, 456",
-  "zipCode": "01310-100",
-  "number": "456",
-  "city": "São Paulo",
-  "state": "SP"
+  "address": {
+    "street": "Av. Paulista",
+    "number": "456",
+    "city": "São Paulo",
+    "state": "SP",
+    "postalCode": "01310-100",
+    "country": "BR"
+  }
 }
 
 ###
-PATCH http://localhost:3000/clients/1
+PATCH {{baseUrl}}/clients/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "email": "maria.nova@email.com"
 }
 
 ###
-DELETE http://localhost:3000/clients/1
+DELETE {{baseUrl}}/clients/1
+Authorization: Bearer {{authToken}}
+
+### Notas
+# As respostas agora seguem o envelope padrão:
+#   Sucesso: { "data": {...}, "message?": string, "meta?": { ... } }
+#   Erro:    { "message": string, "code": string, "details?": any }

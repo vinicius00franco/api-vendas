@@ -1,5 +1,8 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
 ### Users
-POST http://localhost:3000/users
+POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
@@ -10,8 +13,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/users/1
+PUT {{baseUrl}}/users/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "João Santos",
@@ -21,12 +25,14 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/users/1
+PATCH {{baseUrl}}/users/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "admin": true
 }
 
 ###
-DELETE http://localhost:3000/users/1
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{authToken}}

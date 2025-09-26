@@ -1,6 +1,10 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
 ### Sales
-POST http://localhost:3000/sales
+POST {{baseUrl}}/sales
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "value": 2500.00,
@@ -10,8 +14,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/sales/1
+PUT {{baseUrl}}/sales/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "value": 3000.00,
@@ -21,12 +26,14 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/sales/1
+PATCH {{baseUrl}}/sales/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "discount": 150.00
 }
 
 ###
-DELETE http://localhost:3000/sales/1
+DELETE {{baseUrl}}/sales/1
+Authorization: Bearer {{authToken}}

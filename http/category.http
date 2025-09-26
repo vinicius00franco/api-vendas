@@ -1,6 +1,10 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
 ### Categories
-POST http://localhost:3000/categories
+POST {{baseUrl}}/categories
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Eletrônicos",
@@ -8,8 +12,9 @@ Content-Type: application/json
 }
 
 ###
-PUT http://localhost:3000/categories/1
+PUT {{baseUrl}}/categories/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Informática",
@@ -17,12 +22,14 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:3000/categories/1
+PATCH {{baseUrl}}/categories/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "description": "Equipamentos de informática"
 }
 
 ###
-DELETE http://localhost:3000/categories/1
+DELETE {{baseUrl}}/categories/1
+Authorization: Bearer {{authToken}}

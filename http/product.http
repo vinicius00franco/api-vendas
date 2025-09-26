@@ -1,34 +1,41 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
 ### Products
-POST http://localhost:3000/products
+POST {{baseUrl}}/products
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Notebook Dell",
-  "EAN": "7891234567890",
+  "ean": "7891234567890",
   "price": 2500.00,
   "description": "Notebook Dell Inspiron",
   "categoryId": 1
 }
 
 ###
-PUT http://localhost:3000/products/1
+PUT {{baseUrl}}/products/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Notebook Dell XPS",
-  "EAN": "7891234567890",
+  "ean": "7891234567890",
   "price": 3500.00,
   "description": "Notebook Dell XPS 13",
   "categoryId": 1
 }
 
 ###
-PATCH http://localhost:3000/products/1
+PATCH {{baseUrl}}/products/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "price": 3000.00
 }
 
 ###
-DELETE http://localhost:3000/products/1
+DELETE {{baseUrl}}/products/1
+Authorization: Bearer {{authToken}}

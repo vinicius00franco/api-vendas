@@ -1,40 +1,54 @@
+@baseUrl = http://localhost:3000
+@authToken = {{authToken}}
+
 ### Clients
-POST http://localhost:3000/clients
+POST {{baseUrl}}/clients
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Maria Silva",
-  "cpf": "12345678901",
+  "document": "12345678901",
   "email": "maria@email.com",
-  "address": "Rua das Flores, 123",
-  "zipCode": "01234-567",
-  "number": "123",
-  "city": "São Paulo",
-  "state": "SP"
+  "phone": "+55 11 99999-9999",
+  "address": {
+    "street": "Rua das Flores",
+    "number": "123",
+    "city": "São Paulo",
+    "state": "SP",
+    "postalCode": "01234-567",
+    "country": "BR"
+  }
 }
 
 ###
-PUT http://localhost:3000/clients/1
+PUT {{baseUrl}}/clients/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "name": "Maria Santos",
-  "cpf": "12345678901",
+  "document": "12345678901",
   "email": "maria.santos@email.com",
-  "address": "Av. Paulista, 456",
-  "zipCode": "01310-100",
-  "number": "456",
-  "city": "São Paulo",
-  "state": "SP"
+  "address": {
+    "street": "Av. Paulista",
+    "number": "456",
+    "city": "São Paulo",
+    "state": "SP",
+    "postalCode": "01310-100",
+    "country": "BR"
+  }
 }
 
 ###
-PATCH http://localhost:3000/clients/1
+PATCH {{baseUrl}}/clients/1
 Content-Type: application/json
+Authorization: Bearer {{authToken}}
 
 {
   "email": "maria.nova@email.com"
 }
 
 ###
-DELETE http://localhost:3000/clients/1
+DELETE {{baseUrl}}/clients/1
+Authorization: Bearer {{authToken}}
