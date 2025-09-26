@@ -1,2 +1,2 @@
-export { CategoryController } from './CategoryController';
-export { CategoryService } from './CategoryService';
+export { CategoryController } from './CategoryController.js';
+export { CategoryService } from './CategoryService.js';

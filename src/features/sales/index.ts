@@ -1,2 +1,2 @@
-export { SalesController } from './SalesController';
-export { SalesService } from './SalesService';
+export { SalesController } from './SalesController.js';
+export { SalesService } from './SalesService.js';

@@ -43,3 +43,6 @@ Thumbs.db
 # Optional: temporary npm / yarn / pnpm files
 package-lock.json.tmp
 yarn-debug.log*
+
+# Database files
+database.sqlite

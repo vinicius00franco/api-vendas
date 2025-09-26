@@ -1,84 +1,124 @@
-interface Sale {
-  id: number;
+import { Repository } from "typeorm";
+import { AppDataSource } from "../../shared/database/data-source.js";
+import { Client } from "../client/Client.js";
+import { Product } from "../product/Product.js";
+import { Sale } from "./Sale.js";
+
+export type CreateSaleInput = {
   value: number;
-  discount: number;
-  productid: number;
-  ClientId: number;
-  createdAt: Date;
-}
+  discount?: number;
+  productId: number;
+  clientId: number;
+};
+
+export type UpdateSaleInput = Partial<CreateSaleInput>;
 
 class SalesService {
-  private sales: Sale[] = [
-    {
-      id: 1,
-      value: 899.99,
-      discount: 50.00,
-      productid: 1,
-      ClientId: 1,
-      createdAt: new Date('2024-01-15')
-    },
-    {
-      id: 2,
-      value: 79.90,
-      discount: 0,
-      productid: 2,
-      ClientId: 2,
-      createdAt: new Date('2024-01-16')
-    },
-    {
-      id: 3,
-      value: 299.99,
-      discount: 30.00,
-      productid: 3,
-      ClientId: 1,
-      createdAt: new Date('2024-01-17')
-    }
-  ];
+  private get repository(): Repository<Sale> {
+    return AppDataSource.getRepository(Sale);
+  }
 
-  async create(data: Omit<Sale, 'id' | 'createdAt'>): Promise<Sale> {
-    const newSale = { 
-      id: this.sales.length + 1, 
-      ...data,
-      createdAt: new Date()
-    };
-    this.sales.push(newSale);
-    return newSale;
+  private get productRepository(): Repository<Product> {
+    return AppDataSource.getRepository(Product);
+  }
+
+  private get clientRepository(): Repository<Client> {
+    return AppDataSource.getRepository(Client);
+  }
+
+  async create(data: CreateSaleInput): Promise<Sale> {
+    if (Number.isNaN(data.value)) {
+      throw new Error("Valor da venda é obrigatório");
+    }
+
+    if (data.discount !== undefined && Number.isNaN(data.discount)) {
+      throw new Error("Desconto inválido");
+    }
+
+    const product = await this.productRepository.findOne({ where: { id: data.productId } });
+    if (!product) {
+      throw new Error("Produto informado não foi encontrado");
+    }
+
+    const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+    if (!client) {
+      throw new Error("Cliente informado não foi encontrado");
+    }
+
+    const sale = this.repository.create({
+      value: data.value,
+      discount: data.discount ?? 0,
+      productId: data.productId,
+      clientId: data.clientId,
+    });
+
+    return this.repository.save(sale);
   }
 
   async findAll(): Promise<Sale[]> {
-    return this.sales;
+    return this.repository.find({ relations: { product: true, client: true } });
   }
 
   async findById(id: number): Promise<Sale | null> {
-    return this.sales.find(sale => sale.id === id) || null;
+    return this.repository.findOne({ where: { id }, relations: { product: true, client: true } });
   }
 
   async findByClient(clientId: number): Promise<Sale[]> {
-    return this.sales.filter(sale => sale.ClientId === clientId);
+    return this.repository.find({ where: { clientId } });
   }
 
   async findByProduct(productId: number): Promise<Sale[]> {
-    return this.sales.filter(sale => sale.productid === productId);
+    return this.repository.find({ where: { productId } });
   }
 
-  async update(id: number, data: Partial<Omit<Sale, 'id' | 'createdAt'>>): Promise<Sale | null> {
-    const index = this.sales.findIndex(sale => sale.id === id);
-    if (index === -1) return null;
-    
-    this.sales[index] = { ...this.sales[index], ...data };
-    return this.sales[index];
+  async update(id: number, data: UpdateSaleInput): Promise<Sale> {
+    const sale = await this.repository.findOne({ where: { id } });
+    if (!sale) {
+      throw new Error("Venda não encontrada");
+    }
+
+    if (data.value !== undefined && Number.isNaN(data.value)) {
+      throw new Error("Valor inválido");
+    }
+
+    if (data.discount !== undefined && Number.isNaN(data.discount)) {
+      throw new Error("Desconto inválido");
+    }
+
+    if (data.productId && data.productId !== sale.productId) {
+      const product = await this.productRepository.findOne({ where: { id: data.productId } });
+      if (!product) {
+        throw new Error("Produto informado não foi encontrado");
+      }
+    }
+
+    if (data.clientId && data.clientId !== sale.clientId) {
+      const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+      if (!client) {
+        throw new Error("Cliente informado não foi encontrado");
+      }
+    }
+
+    const updated = this.repository.merge(sale, {
+      ...data,
+      discount: data.discount ?? sale.discount,
+    });
+
+    return this.repository.save(updated);
   }
 
-  async delete(id: number): Promise<boolean> {
-    const index = this.sales.findIndex(sale => sale.id === id);
-    if (index === -1) return false;
-    
-    this.sales.splice(index, 1);
-    return true;
+  async delete(id: number): Promise<void> {
+    const sale = await this.repository.findOne({ where: { id } });
+    if (!sale) {
+      throw new Error("Venda não encontrada");
+    }
+
+    await this.repository.remove(sale);
   }
 
   async getTotalSales(): Promise<number> {
-    return this.sales.reduce((total, sale) => total + (sale.value - sale.discount), 0);
+    const sales = await this.repository.find();
+    return sales.reduce((total, sale) => total + (Number(sale.value) - Number(sale.discount)), 0);
   }
 }
 

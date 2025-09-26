@@ -1,72 +1,120 @@
-interface Product {
-  id: number;
+import { Repository } from "typeorm";
+import { AppDataSource } from "../../shared/database/data-source.js";
+import { Category } from "../category/Category.js";
+import { Product } from "./Product.js";
+
+export type CreateProductInput = {
   name: string;
-  EAN: string;
+  ean: string;
   price: number;
-  description: string;
+  description?: string;
   categoryId: number;
-}
+};
+
+export type UpdateProductInput = Partial<CreateProductInput>;
 
 class ProductService {
-  private products: Product[] = [
-    {
-      id: 1,
-      name: "Smartphone Samsung",
-      EAN: "7891234567890",
-      price: 899.99,
-      description: "Smartphone Android com 128GB",
-      categoryId: 1
-    },
-    {
-      id: 2,
-      name: "Camiseta Polo",
-      EAN: "7891234567891",
-      price: 79.90,
-      description: "Camiseta polo masculina azul",
-      categoryId: 2
-    },
-    {
-      id: 3,
-      name: "Mesa de Centro",
-      EAN: "7891234567892",
-      price: 299.99,
-      description: "Mesa de centro em madeira",
-      categoryId: 3
-    }
-  ];
+  private get repository(): Repository<Product> {
+    return AppDataSource.getRepository(Product);
+  }
 
-  async create(data: Omit<Product, 'id'>): Promise<Product> {
-    const newProduct = { id: this.products.length + 1, ...data };
-    this.products.push(newProduct);
-    return newProduct;
+  private get categoryRepository(): Repository<Category> {
+    return AppDataSource.getRepository(Category);
+  }
+
+  async create(data: CreateProductInput): Promise<Product> {
+    if (!data.name) {
+      throw new Error("Nome do produto é obrigatório");
+    }
+
+    if (!data.ean) {
+      throw new Error("EAN do produto é obrigatório");
+    }
+
+    const existing = await this.repository.findOne({ where: { name: data.name } });
+    if (existing) {
+      throw new Error("Já existe um produto com este nome");
+    }
+
+    const existingEAN = await this.repository.findOne({ where: { ean: data.ean } });
+    if (existingEAN) {
+      throw new Error("Já existe um produto com este EAN");
+    }
+
+    const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+    if (!category) {
+      throw new Error("Categoria informada não foi encontrada");
+    }
+
+    const product = this.repository.create({
+      name: data.name,
+      ean: data.ean,
+      price: data.price,
+      description: data.description ?? null,
+      categoryId: data.categoryId,
+    });
+
+    return this.repository.save(product);
   }
 
   async findAll(): Promise<Product[]> {
-    return this.products;
+    return this.repository.find({ relations: { category: true } });
   }
 
   async findById(id: number): Promise<Product | null> {
-    return this.products.find(product => product.id === id) || null;
+    return this.repository.findOne({ where: { id }, relations: { category: true } });
   }
 
   async findByCategory(categoryId: number): Promise<Product[]> {
-    return this.products.filter(product => product.categoryId === categoryId);
+    return this.repository.find({ where: { categoryId } });
   }
 
-  async update(id: number, data: Partial<Omit<Product, 'id'>>): Promise<Product | null> {
-    const index = this.products.findIndex(product => product.id === id);
-    if (index === -1) return null;
-    
-    this.products[index] = { ...this.products[index], ...data };
-    return this.products[index];
+  async update(id: number, data: UpdateProductInput): Promise<Product> {
+    const product = await this.repository.findOne({ where: { id } });
+    if (!product) {
+      throw new Error("Produto não encontrado");
+    }
+
+    if (data.name && data.name !== product.name) {
+      const existing = await this.repository.findOne({ where: { name: data.name } });
+      if (existing && existing.id !== id) {
+        throw new Error("Já existe um produto com este nome");
+      }
+    }
+
+    if (data.ean && data.ean !== product.ean) {
+      const existingEAN = await this.repository.findOne({ where: { ean: data.ean } });
+      if (existingEAN && existingEAN.id !== id) {
+        throw new Error("Já existe um produto com este EAN");
+      }
+    }
+
+    if (data.categoryId && data.categoryId !== product.categoryId) {
+      const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+      if (!category) {
+        throw new Error("Categoria informada não foi encontrada");
+      }
+    }
+
+    if (data.description !== undefined) {
+      product.description = data.description ?? null;
+    }
+
+    const updated = this.repository.merge(product, {
+      ...data,
+      description: product.description,
+    });
+
+    return this.repository.save(updated);
   }
 
-  async delete(id: number): Promise<boolean> {
-    const index = this.products.findIndex(product => product.id === id);
-    if (index === -1) return false;
-    
-    this.products.splice(index, 1);
-    return true;
+  async delete(id: number): Promise<void> {
+    const product = await this.repository.findOne({ where: { id } });
+    if (!product) {
+      throw new Error("Produto não encontrado");
+    }
+
+    await this.repository.remove(product);
   }
 }
 

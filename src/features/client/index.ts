@@ -1,2 +1,2 @@
-export { ClientController } from './ClientController';
-export { ClientService } from './ClientService';
+export { ClientController } from './ClientController.js';
+export { ClientService } from './ClientService.js';

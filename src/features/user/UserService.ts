@@ -56,9 +56,12 @@ class UserService {
   async update(id: number, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<Omit<User, 'password'> | null> {
     const index = this.users.findIndex(user => user.id === id);
     if (index === -1) return null;
-    
-    this.users[index] = { ...this.users[index], ...data };
-    const { password, ...userWithoutPassword } = this.users[index];
+
+    const currentUser = this.users[index];
+    const updatedUser = Object.assign({}, currentUser, data) as User;
+
+    this.users[index] = updatedUser;
+    const { password, ...userWithoutPassword } = updatedUser;
     return userWithoutPassword;
   }
 

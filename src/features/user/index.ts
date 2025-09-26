@@ -1,2 +1,2 @@
-export { UserController } from './UserController';
-export { UserService } from './UserService';
+export { UserController } from './UserController.js';
+export { UserService } from './UserService.js';
