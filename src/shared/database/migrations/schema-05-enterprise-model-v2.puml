@@ -1,0 +1,194 @@
+@startuml schema-enterprise-model-v2-basic
+!theme vibrant
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundCorner 10
+
+' -- ENTIDADES --
+
+' Grupo: Produto e Catalogo
+entity categories {
+  * cat_id : BIGSERIAL
+  --
+  cat_uuid : UUID
+  cat_parent_id : BIGINT <<FK>>
+  cat_name : VARCHAR
+  cat_description : TEXT
+  cat_created_at : TIMESTAMPTZ
+  cat_updated_at : TIMESTAMPTZ
+}
+
+entity brands {
+  * brd_id : BIGSERIAL
+  --
+  brd_uuid : UUID
+  brd_name : VARCHAR
+  brd_created_at : TIMESTAMPTZ
+  brd_updated_at : TIMESTAMPTZ
+}
+
+entity products {
+  * pro_id : BIGSERIAL
+  --
+  pro_uuid : UUID
+  pro_cat_id : BIGINT <<FK>>
+  pro_brd_id : BIGINT <<FK>>
+  pro_name : VARCHAR
+  pro_description : TEXT
+  pro_created_at : TIMESTAMPTZ
+  pro_updated_at : TIMESTAMPTZ
+}
+
+entity product_variants {
+  * pva_id : BIGSERIAL
+  --
+  pva_uuid : UUID
+  pva_pro_id : BIGINT <<FK>>
+  pva_sku : VARCHAR
+  pva_ean : VARCHAR
+  pva_price : DECIMAL(12,2)
+  pva_stock_quantity: INT
+  pva_created_at : TIMESTAMPTZ
+  pva_updated_at : TIMESTAMPTZ
+}
+
+' Grupo: Gestao de Clientes
+entity clients {
+  * cli_id : BIGSERIAL
+  --
+  cli_uuid : UUID
+  cli_name : VARCHAR
+  cli_email : VARCHAR
+  cli_phone : VARCHAR
+  cli_created_at : TIMESTAMPTZ
+  cli_updated_at : TIMESTAMPTZ
+}
+
+entity person_details {
+  * pdt_cli_id : BIGINT <<PK, FK>>
+  --
+  pdt_cpf : VARCHAR(11)
+  pdt_birth_date : DATE
+}
+
+entity company_details {
+  * cdt_cli_id : BIGINT <<PK, FK>>
+  --
+  cdt_cnpj : VARCHAR(14)
+  cdt_legal_name : VARCHAR
+}
+
+' Grupo: Enderecos e Geografia
+entity addresses {
+  * adr_id : BIGSERIAL
+  --
+  adr_cli_id : BIGINT <<FK>>
+  adr_cit_id : BIGINT <<FK>>
+  adr_aty_id : INT <<FK>>
+  adr_street : VARCHAR
+  adr_number : VARCHAR
+  adr_complement : VARCHAR
+  adr_neighborhood : VARCHAR
+  adr_zip_code : VARCHAR(9)
+  adr_created_at : TIMESTAMPTZ
+  adr_updated_at : TIMESTAMPTZ
+}
+
+entity cities {
+  * cit_id : SERIAL
+  --
+  cit_sta_id : INT <<FK>>
+  cit_name : VARCHAR
+}
+
+entity states {
+  * sta_id : SERIAL
+  --
+  sta_name : VARCHAR
+  sta_uf : VARCHAR(2)
+}
+
+entity address_types {
+  * aty_id : SERIAL
+  --
+  aty_name : VARCHAR(50)
+}
+
+' Grupo: Pedidos e Entrega
+entity orders {
+  * ord_id : BIGSERIAL
+  --
+  ord_uuid : UUID
+  ord_cli_id : BIGINT <<FK>>
+  ord_ost_id : INT <<FK>>
+  ord_total_value : DECIMAL(12,2)
+  ord_total_discount : DECIMAL(12,2)
+  ord_created_at : TIMESTAMPTZ
+  ord_updated_at : TIMESTAMPTZ
+}
+
+entity order_items {
+  * oit_id : BIGSERIAL
+  --
+  oit_ord_id : BIGINT <<FK>>
+  oit_pva_id : BIGINT <<FK>>
+  oit_quantity : INT
+  oit_unit_price : DECIMAL(12,2)
+  oit_discount : DECIMAL(12,2)
+}
+
+entity order_statuses {
+  * ost_id : SERIAL
+  --
+  ost_name : VARCHAR(50)
+  ost_description : TEXT
+}
+
+' Grupo: Seguranca e Acesso (RBAC)
+entity users {
+  * usr_id : BIGSERIAL
+  --
+  usr_uuid : UUID
+  usr_name : VARCHAR
+  usr_email : VARCHAR
+  usr_password_hash : VARCHAR
+  usr_created_at : TIMESTAMPTZ
+  usr_updated_at : TIMESTAMPTZ
+}
+entity roles {
+  * rol_id : SERIAL
+  --
+  rol_name : VARCHAR(50)
+}
+entity user_roles {
+  * uro_usr_id : BIGINT <<FK>>
+  * uro_rol_id : INT <<FK>>
+}
+
+
+' -- RELATIONSHIPS --
+' Product Relationships
+categories }o--|| categories : "cat_parent_id"
+categories ||--o{ products : "pro_cat_id"
+brands ||--o{ products : "pro_brd_id"
+products ||--o{ product_variants : "pva_pro_id"
+
+' Client & Address Relationships
+clients ||--|{ person_details : "pdt_cli_id"
+clients ||--|{ company_details : "cdt_cli_id"
+clients ||--o{ addresses : "adr_cli_id"
+cities ||--o{ addresses : "adr_cit_id"
+states ||--o{ cities : "cit_sta_id"
+address_types ||--o{ addresses : "adr_aty_id"
+
+' Order Relationships
+clients ||--o{ orders : "ord_cli_id"
+orders }o--|| order_items : "oit_ord_id"
+product_variants }o--|| order_items : "oit_pva_id"
+order_statuses ||--o{ orders : "ord_ost_id"
+
+' RBAC Relationships
+users }o--|| user_roles : "uro_usr_id"
+roles }o--|| user_roles : "uro_rol_id"
+
+@enduml
