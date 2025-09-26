@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JsonResponse } from "../../shared/http/JsonResponse.js";
 import { CategoryService } from "./CategoryService.js";
 import { CategoryRequestDto } from "./CategoryRequestDto.js";
 
@@ -6,73 +7,77 @@ class CategoryController {
   private readonly categoryService = new CategoryService();
 
   async create(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
       const payload = dto.toCreateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const category = await this.categoryService.create(payload.data);
 
-      return response.status(201).json(category);
+      return responder.created(category);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 
   async update(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       const payload = dto.toUpdateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const category = await this.categoryService.update(idResult.data, payload.data);
-      return response.json(category);
+      return responder.success(category);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 
   async delete(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       await this.categoryService.delete(idResult.data);
-      return response.status(204).send();
+      return responder.noContent();
     } catch (error) {
-      return response.status(404).json({ message: (error as Error).message });
+      return responder.error((error as Error).message, { status: 404 });
     }
   }
 
   async patch(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       const payload = dto.toUpdateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const category = await this.categoryService.update(idResult.data, payload.data);
-      return response.json(category);
+      return responder.success(category);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 }

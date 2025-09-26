@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { JsonResponse } from "../../shared/http/JsonResponse.js";
 import { ClientService } from "./ClientService.js";
 import { ClientRequestDto } from "./ClientRequestDto.js";
 
@@ -6,73 +7,77 @@ class ClientController {
   private readonly clientService = new ClientService();
 
   async create(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = ClientRequestDto.fromRequest(request);
       const payload = dto.toCreateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const client = await this.clientService.create(payload.data);
 
-      return response.status(201).json(client);
+      return responder.created(client);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 
   async update(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = ClientRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       const payload = dto.toUpdateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const client = await this.clientService.update(idResult.data, payload.data);
-      return response.json(client);
+      return responder.success(client);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 
   async delete(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = ClientRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       await this.clientService.delete(idResult.data);
-      return response.status(204).send();
+      return responder.noContent();
     } catch (error) {
-      return response.status(404).json({ message: (error as Error).message });
+      return responder.error((error as Error).message, { status: 404 });
     }
   }
 
   async patch(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
     try {
       const dto = ClientRequestDto.fromRequest(request);
       const idResult = dto.getId();
       if (!idResult.success) {
-        return response.status(idResult.status ?? 400).json({ message: idResult.message });
+        return responder.fromValidation(idResult);
       }
 
       const payload = dto.toUpdateInput();
       if (!payload.success) {
-        return response.status(payload.status ?? 400).json({ message: payload.message });
+        return responder.fromValidation(payload);
       }
 
       const client = await this.clientService.update(idResult.data, payload.data);
-      return response.json(client);
+      return responder.success(client);
     } catch (error) {
-      return response.status(400).json({ message: (error as Error).message });
+      return responder.error((error as Error).message);
     }
   }
 }
