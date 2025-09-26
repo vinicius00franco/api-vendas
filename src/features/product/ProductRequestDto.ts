@@ -23,51 +23,47 @@ class ProductRequestDto extends BaseRequestDto {
 
   toCreateInput(): ValidationResult<CreateProductInput> {
     const nameResult = this.requireString(this.firstValue("name", "Name"), "Nome do produto é obrigatório");
-    if (!nameResult.success) {
-      return nameResult;
-    }
+    if (!nameResult.success) return nameResult;
 
-    const eanResult = this.requireString(this.firstValue("ean", "EAN"), "EAN do produto é obrigatório");
-    if (!eanResult.success) {
-      return eanResult;
-    }
+    const categoryResult = this.validateInteger(this.firstValue("categoryId", "category_id"), {
+      invalid: "Identificador inválido",
+      missing: "Categoria do produto é obrigatória",
+    }, { required: true });
+    if (!categoryResult.success) return categoryResult;
 
-    const priceResult = this.validateNumber(
-      this.firstValue("price"),
-      {
-        invalid: "Valor numérico inválido",
-        missing: "Preço do produto é obrigatório",
-      },
-      { required: true }
-    );
-    if (!priceResult.success) {
-      return priceResult;
-    }
+    const brandResult = this.validateInteger(this.firstValue("brandId", "brand_id"), {
+      invalid: "Identificador inválido",
+      missing: "Marca do produto é obrigatória",
+    }, { required: true });
+    if (!brandResult.success) return brandResult;
 
-    const categoryResult = this.validateInteger(
-      this.firstValue("categoryId", "category_id"),
-      {
-        invalid: "Identificador inválido",
-        missing: "Categoria do produto é obrigatória",
-      },
-      { required: true }
-    );
-    if (!categoryResult.success) {
-      return categoryResult;
-    }
+    const priceResult = this.validateNumber(this.firstValue("price", "variant.price"), {
+      invalid: "Valor numérico inválido",
+      missing: "Preço do produto é obrigatório",
+    }, { required: true });
+    if (!priceResult.success) return priceResult;
 
-    const description = this.optionalString(this.firstValue("description"));
+  const ean = this.optionalString(this.firstValue("ean", "variant.ean", "EAN"));
+  const sku = this.optionalString(this.firstValue("sku", "variant.sku", "SKU"));
+    const stock = this.validateInteger(this.firstValue("stockQuantity", "variant.stockQuantity"), {
+      invalid: "Quantidade em estoque inválida",
+    });
+    if (!stock.success) return stock;
+
+  const description = this.optionalString(this.firstValue("description"));
 
     const createInput: CreateProductInput = {
       name: nameResult.data,
-      ean: eanResult.data,
-      price: priceResult.data!,
+  description: description ?? null,
       categoryId: categoryResult.data!,
+      brandId: brandResult.data!,
+      variant: {
+        price: priceResult.data!,
+        ean: ean ?? null,
+        sku: sku ?? null,
+        stockQuantity: stock.data ?? 0,
+      },
     };
-
-    if (description !== undefined) {
-      createInput.description = description;
-    }
 
     return this.success(createInput);
   }
@@ -87,33 +83,7 @@ class ProductRequestDto extends BaseRequestDto {
       }
     }
 
-    if (this.hasAnyField("ean", "EAN")) {
-      const eanResult = this.validateStringIfPresent(this.firstValue("ean", "EAN"), {
-        invalid: "EAN do produto inválido",
-      });
-      if (!eanResult.success) {
-        return eanResult;
-      }
-      if (eanResult.data !== undefined) {
-        update.ean = eanResult.data;
-      }
-    }
-
-    if (this.hasAnyField("price")) {
-      const priceResult = this.validateNumber(
-        this.firstValue("price"),
-        {
-          invalid: "Valor numérico inválido",
-        }
-      );
-      if (!priceResult.success) {
-        return priceResult;
-      }
-      if (priceResult.data === undefined) {
-        return this.error("Preço do produto inválido");
-      }
-      update.price = priceResult.data;
-    }
+    // SKU/EAN/price now belong to variant. Allow passing brandId as well.
 
     if (this.hasAnyField("description")) {
       const description = this.optionalString(this.firstValue("description"));
@@ -136,6 +106,15 @@ class ProductRequestDto extends BaseRequestDto {
         return this.error("Categoria do produto inválida");
       }
       update.categoryId = categoryResult.data;
+    }
+
+    if (this.hasAnyField("brandId", "brand_id")) {
+      const brandResult = this.validateInteger(this.firstValue("brandId", "brand_id"), {
+        invalid: "Identificador inválido",
+      });
+      if (!brandResult.success) return brandResult;
+      if (brandResult.data === undefined) return this.error("Marca do produto inválida");
+  (update as any).brandId = brandResult.data;
     }
 
     if (Object.keys(update).length === 0) {

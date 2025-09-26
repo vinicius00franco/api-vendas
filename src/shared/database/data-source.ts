@@ -2,8 +2,9 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { Category } from "../../features/category/Category.js";
 import { Product } from "../../features/product/Product.js";
+import { ProductVariant } from "../../features/product/ProductVariant.js";
+import { Brand } from "../../features/brand/Brand.js";
 import { Client } from "../../features/client/Client.js";
-import { Sale } from "../../features/sales/Sale.js";
 import { User } from "../../features/user/User.js";
 
 const isTestEnv = process.env.NODE_ENV === "test";
@@ -21,7 +22,7 @@ export const AppDataSource = new DataSource({
   ...(defaultPostgresConfig),
   synchronize: false,
   logging: false,
-  entities: [Category, Product, Client, Sale, User],
+  entities: [Category, Brand, Product, ProductVariant, Client, User],
   migrations: ["src/shared/database/migrations/*.ts"],
   ...(isTestEnv
     ? {

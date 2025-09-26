@@ -27,7 +27,8 @@ class Sale {
   @Column({ name: "product_id" })
   productId!: number;
 
-  @ManyToOne(() => Product, (product) => product.sales, {
+  // Temporary inverse side mapping adjusted; full refactor to Orders pending
+  @ManyToOne(() => Product, (product) => product.variants, {
     nullable: false,
     onDelete: "CASCADE",
   })
