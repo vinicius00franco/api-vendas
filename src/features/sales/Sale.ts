@@ -12,8 +12,11 @@ import { Product } from "../product/Product.js";
 
 @Entity({ name: "sales" })
 class Sale {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id!: number;
+
+  @Column({ name: "uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
+  uuid!: string;
 
   @Column({ type: "decimal", precision: 12, scale: 2 })
   value!: number;

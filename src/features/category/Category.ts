@@ -10,8 +10,11 @@ import { Product } from "../product/Product.js";
 
 @Entity({ name: "categories" })
 class Category {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id!: number;
+
+  @Column({ name: "uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
+  uuid!: string;
 
   @Column({ unique: true })
   name!: string;

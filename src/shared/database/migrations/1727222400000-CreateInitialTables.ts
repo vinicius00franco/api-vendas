@@ -2,26 +2,34 @@ import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreateInitialTables1727222400000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
+
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS categories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id BIGSERIAL PRIMARY KEY,
+        uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
         name VARCHAR NOT NULL UNIQUE,
         description TEXT,
-        created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-        updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
 
     await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_categories_uuid ON categories (uuid);
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS products (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id BIGSERIAL PRIMARY KEY,
+        uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
         name VARCHAR NOT NULL UNIQUE,
         ean VARCHAR NOT NULL UNIQUE,
         price DECIMAL(12,2) NOT NULL,
         description TEXT,
-        category_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-        updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+        category_id BIGINT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_products_category FOREIGN KEY (category_id)
           REFERENCES categories(id)
           ON UPDATE CASCADE
@@ -30,8 +38,13 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_products_uuid ON products (uuid);
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS clients (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id BIGSERIAL PRIMARY KEY,
+        uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
         name VARCHAR NOT NULL,
         document VARCHAR NOT NULL UNIQUE,
         email VARCHAR NOT NULL,
@@ -40,20 +53,25 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
         number VARCHAR NOT NULL,
         city VARCHAR NOT NULL,
         state VARCHAR(2) NOT NULL,
-        created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-        updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
 
     await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_clients_uuid ON clients (uuid);
+    `);
+
+    await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS sales (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id BIGSERIAL PRIMARY KEY,
+        uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
         value DECIMAL(12,2) NOT NULL,
         discount DECIMAL(12,2) NOT NULL DEFAULT 0,
-        product_id INTEGER NOT NULL,
-        client_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
-        updated_at DATETIME DEFAULT (CURRENT_TIMESTAMP),
+        product_id BIGINT NOT NULL,
+        client_id BIGINT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
         CONSTRAINT fk_sales_product FOREIGN KEY (product_id)
           REFERENCES products(id)
           ON UPDATE CASCADE
@@ -63,6 +81,10 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
           ON UPDATE CASCADE
           ON DELETE CASCADE
       );
+    `);
+
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_uuid ON sales (uuid);
     `);
   }
 

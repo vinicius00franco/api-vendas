@@ -12,8 +12,11 @@ import { Sale } from "../sales/Sale.js";
 @Entity({ name: "clients" })
 @Index(["document"], { unique: true })
 class Client {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: "bigint" })
   id!: number;
+
+  @Column({ name: "uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
+  uuid!: string;
 
   @Column()
   name!: string;
