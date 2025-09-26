@@ -9,6 +9,18 @@ import {
 } from "typeorm";
 import { Sale } from "../sales/Sale.js";
 
+export type ClientAddress = {
+  street: string;
+  number?: string;
+  complement?: string;
+  district?: string;
+  city: string;
+  region?: string;
+  state?: string;
+  postalCode: string;
+  country: string;
+};
+
 @Entity({ name: "clients" })
 @Index(["document"], { unique: true })
 class Client {
@@ -27,20 +39,11 @@ class Client {
   @Column()
   email!: string;
 
-  @Column()
-  address!: string;
+  @Column({ nullable: true })
+  phone!: string | null;
 
-  @Column({ name: "zip_code" })
-  zipCode!: string;
-
-  @Column()
-  number!: string;
-
-  @Column()
-  city!: string;
-
-  @Column({ length: 2 })
-  state!: string;
+  @Column({ type: "jsonb" })
+  address!: ClientAddress;
 
   @OneToMany(() => Sale, (sale: Sale) => sale.client)
   sales!: Sale[];

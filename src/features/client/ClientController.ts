@@ -1,17 +1,20 @@
 import { Request, Response } from "express";
-import { ClientService, type UpdateClientInput } from "./ClientService.js";
+import {
+  ClientService,
+  type ClientAddressInput,
+  type UpdateClientInput,
+} from "./ClientService.js";
 
 class ClientController {
   private readonly clientService = new ClientService();
 
   async create(request: Request, response: Response) {
-    const { name, cpf, document, email, address, adress, zipCode, zipcode, number, city, state } = request.body;
+    const { name, cpf, document, email, phone } = request.body;
     try {
       const documentValue = document ?? cpf;
-      const addressValue = address ?? adress;
-      const zipCodeValue = zipCode ?? zipcode;
+      const address = this.buildAddressFromBody(request.body);
 
-      if (!name || !documentValue || !email || !addressValue || !zipCodeValue || !number || !city || !state) {
+      if (!name || !documentValue || !email || !address) {
         return response.status(400).json({ message: "Dados do cliente inválidos" });
       }
 
@@ -19,11 +22,8 @@ class ClientController {
         name,
         document: documentValue,
         email,
-        address: addressValue,
-        zipCode: zipCodeValue,
-        number,
-        city,
-        state,
+        phone: phone ?? undefined,
+        address,
       });
 
       return response.status(201).json(client);
@@ -34,17 +34,8 @@ class ClientController {
 
   async update(request: Request, response: Response) {
     const { id } = request.params;
-    const { name, cpf, document, email, address, adress, zipCode, zipcode, number, city, state } = request.body;
     try {
-      const payload: UpdateClientInput = {};
-      if (name !== undefined) payload.name = name;
-      if (document !== undefined || cpf !== undefined) payload.document = document ?? cpf;
-      if (email !== undefined) payload.email = email;
-      if (address !== undefined || adress !== undefined) payload.address = address ?? adress;
-      if (zipCode !== undefined || zipcode !== undefined) payload.zipCode = zipCode ?? zipcode;
-      if (number !== undefined) payload.number = number;
-      if (city !== undefined) payload.city = city;
-      if (state !== undefined) payload.state = state;
+      const payload = this.buildUpdatePayload(request.body);
 
       if (Object.keys(payload).length === 0) {
         return response.status(400).json({ message: "Nenhum dado informado para atualização" });
@@ -69,17 +60,8 @@ class ClientController {
 
   async patch(request: Request, response: Response) {
     const { id } = request.params;
-    const updates = request.body;
     try {
-      const payload: UpdateClientInput = {};
-      if (updates.name !== undefined) payload.name = updates.name;
-      if (updates.document !== undefined || updates.cpf !== undefined) payload.document = updates.document ?? updates.cpf;
-      if (updates.email !== undefined) payload.email = updates.email;
-      if (updates.address !== undefined || updates.adress !== undefined) payload.address = updates.address ?? updates.adress;
-      if (updates.zipCode !== undefined || updates.zipcode !== undefined) payload.zipCode = updates.zipCode ?? updates.zipcode;
-      if (updates.number !== undefined) payload.number = updates.number;
-      if (updates.city !== undefined) payload.city = updates.city;
-      if (updates.state !== undefined) payload.state = updates.state;
+      const payload = this.buildUpdatePayload(request.body);
 
       if (Object.keys(payload).length === 0) {
         return response.status(400).json({ message: "Nenhum dado informado para atualização" });
@@ -90,6 +72,132 @@ class ClientController {
     } catch (error) {
       return response.status(400).json({ message: (error as Error).message });
     }
+  }
+
+  private buildAddressFromBody(body: any): ClientAddressInput | null {
+    if (body.address && typeof body.address !== "object" && typeof body.address !== "string") {
+      return null;
+    }
+
+    const nestedAddress = typeof body.address === "object" && body.address !== null ? body.address : undefined;
+
+    const street =
+      nestedAddress?.street ??
+      (typeof body.address === "string" ? body.address : undefined) ??
+      body.street ??
+      body.adress;
+
+    const number = nestedAddress?.number ?? body.number;
+    const complement = nestedAddress?.complement ?? body.complement;
+    const district = nestedAddress?.district ?? body.district;
+    const city = nestedAddress?.city ?? body.city;
+    const region = nestedAddress?.region ?? body.region;
+    const state = nestedAddress?.state ?? body.state;
+    const postalCode =
+      nestedAddress?.postalCode ??
+      nestedAddress?.zipCode ??
+      nestedAddress?.postal_code ??
+      body.postalCode ??
+      body.postal_code ??
+      body.zipCode ??
+      body.zipcode;
+    const country = nestedAddress?.country ?? body.country ?? (this.hasValue(state) ? "BR" : undefined);
+
+    if (!this.hasValue(street) || !this.hasValue(city) || !this.hasValue(postalCode) || !this.hasValue(country)) {
+      return null;
+    }
+
+    const address: ClientAddressInput = {
+      street: String(street).trim(),
+      city: String(city).trim(),
+      postalCode: String(postalCode).trim(),
+      country: String(country).trim(),
+    };
+
+    if (this.hasValue(number)) address.number = String(number).trim();
+    if (this.hasValue(complement)) address.complement = String(complement).trim();
+    if (this.hasValue(district)) address.district = String(district).trim();
+    if (this.hasValue(region)) address.region = String(region).trim();
+    if (this.hasValue(state)) address.state = String(state).trim();
+
+    return address;
+  }
+
+  private buildUpdatePayload(body: any): UpdateClientInput {
+    const payload: UpdateClientInput = {};
+
+  if (body.name !== undefined) payload.name = body.name;
+  if (body.document !== undefined || body.cpf !== undefined) payload.document = body.document ?? body.cpf;
+  if (body.email !== undefined) payload.email = body.email;
+  if (body.phone !== undefined) payload.phone = body.phone;
+
+    const addressUpdate = this.buildAddressUpdate(body);
+    if (addressUpdate) {
+      payload.address = addressUpdate;
+    }
+
+    return payload;
+  }
+
+  private buildAddressUpdate(body: any): Partial<ClientAddressInput> | undefined {
+    const nestedAddress = typeof body.address === "object" && body.address !== null ? body.address : undefined;
+    const update: Partial<ClientAddressInput> = {};
+
+    const street =
+      nestedAddress?.street ??
+      (typeof body.address === "string" ? body.address : undefined) ??
+      body.street ??
+      body.adress;
+    if (street !== undefined && this.hasValue(street)) update.street = String(street).trim();
+
+    const number = nestedAddress?.number ?? body.number;
+    if (number !== undefined && this.hasValue(number)) update.number = String(number).trim();
+
+    const complement = nestedAddress?.complement ?? body.complement;
+    if (complement !== undefined && this.hasValue(complement)) update.complement = String(complement).trim();
+
+    const district = nestedAddress?.district ?? body.district;
+    if (district !== undefined && this.hasValue(district)) update.district = String(district).trim();
+
+    const city = nestedAddress?.city ?? body.city;
+    if (city !== undefined && this.hasValue(city)) update.city = String(city).trim();
+
+    const region = nestedAddress?.region ?? body.region;
+    if (region !== undefined && this.hasValue(region)) update.region = String(region).trim();
+
+    const state = nestedAddress?.state ?? body.state;
+    if (state !== undefined && this.hasValue(state)) update.state = String(state).trim();
+
+    const postalCode =
+      nestedAddress?.postalCode ??
+      nestedAddress?.zipCode ??
+      nestedAddress?.postal_code ??
+      body.postalCode ??
+      body.postal_code ??
+      body.zipCode ??
+      body.zipcode;
+    if (postalCode !== undefined && this.hasValue(postalCode)) update.postalCode = String(postalCode).trim();
+
+    const country = nestedAddress?.country ?? body.country;
+    if (country !== undefined && this.hasValue(country)) update.country = String(country).trim();
+
+    return Object.keys(update).length > 0 ? update : undefined;
+  }
+
+  private hasValue(value: unknown): value is string | number {
+    if (value === undefined || value === null) {
+      return false;
+    }
+
+    if (typeof value === "string") {
+      return value.trim().length > 0;
+    }
+
+    if (typeof value === "number") {
+      return true;
+    }
+
+    return false;
   }
 }
 

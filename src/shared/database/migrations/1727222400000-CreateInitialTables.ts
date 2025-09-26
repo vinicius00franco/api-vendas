@@ -48,11 +48,8 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
         name VARCHAR NOT NULL,
         document VARCHAR NOT NULL UNIQUE,
         email VARCHAR NOT NULL,
-        address VARCHAR NOT NULL,
-        zip_code VARCHAR NOT NULL,
-        number VARCHAR NOT NULL,
-        city VARCHAR NOT NULL,
-        state VARCHAR(2) NOT NULL,
+        phone VARCHAR,
+        address JSONB NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
@@ -60,6 +57,23 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS uq_clients_uuid ON clients (uuid);
+    `);
+
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id BIGSERIAL PRIMARY KEY,
+        uuid UUID NOT NULL DEFAULT uuid_generate_v4(),
+        name VARCHAR NOT NULL,
+        email VARCHAR NOT NULL UNIQUE,
+        password_hash VARCHAR NOT NULL,
+        is_admin BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_users_uuid ON users (uuid);
     `);
 
     await queryRunner.query(`
@@ -92,6 +106,7 @@ export class CreateInitialTables1727222400000 implements MigrationInterface {
     await queryRunner.query(`DROP TABLE IF EXISTS sales;`);
     await queryRunner.query(`DROP TABLE IF EXISTS products;`);
     await queryRunner.query(`DROP TABLE IF EXISTS clients;`);
+    await queryRunner.query(`DROP TABLE IF EXISTS users;`);
     await queryRunner.query(`DROP TABLE IF EXISTS categories;`);
   }
 }

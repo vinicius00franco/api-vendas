@@ -4,16 +4,22 @@ import { ProductController } from "./features/product/index.js";
 import { CategoryController } from "./features/category/index.js";
 import { SalesController } from "./features/sales/index.js";
 import { ClientController } from "./features/client/index.js";
+import { AuthController, ensureAuthenticated } from "./features/auth/index.js";
 
 const userController = new UserController();
 const productController = new ProductController();
 const categoryController = new CategoryController();
 const salesController = new SalesController();
 const clientController = new ClientController();
+const authController = new AuthController();
 
 const router = Router();
 
+router.post("/auth/login", authController.login);
 router.post("/users", userController.create);
+
+router.use(ensureAuthenticated);
+
 router.put("/users/:id", userController.update);
 router.delete("/users/:id", userController.delete);
 router.patch("/users/:id", userController.patch);
@@ -38,4 +44,4 @@ router.put("/clients/:id", clientController.update);
 router.delete("/clients/:id", clientController.delete);
 router.patch("/clients/:id", clientController.patch);
 
-export {router}
+export { router };

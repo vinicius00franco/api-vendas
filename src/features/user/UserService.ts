@@ -1,76 +1,132 @@
-interface User {
-  id: number;
+import bcrypt from "bcryptjs";
+import { Repository } from "typeorm";
+import { AppDataSource } from "../../shared/database/data-source.js";
+import { User } from "./User.js";
+
+export type CreateUserInput = {
   name: string;
-  emalil: string;
-  admin: boolean;
+  email: string;
   password: string;
-  createdAt: Date;
-}
+  isAdmin?: boolean;
+};
+
+export type UpdateUserInput = Partial<{
+  name: string;
+  email: string;
+  password: string;
+  isAdmin: boolean;
+}>;
+
+export type SafeUser = Omit<User, "passwordHash">;
 
 class UserService {
-  private users: User[] = [
-    {
-      id: 1,
-      name: "Admin User",
-      emalil: "admin@empresa.com",
-      admin: true,
-      password: "admin123",
-      createdAt: new Date('2024-01-01')
-    },
-    {
-      id: 2,
-      name: "Vendedor João",
-      emalil: "vendedor@empresa.com",
-      admin: false,
-      password: "vend123",
-      createdAt: new Date('2024-01-02')
-    }
-  ];
-
-  async create(data: Omit<User, 'id' | 'createdAt'>): Promise<User> {
-    const newUser = { 
-      id: this.users.length + 1, 
-      ...data,
-      createdAt: new Date()
-    };
-    this.users.push(newUser);
-    return newUser;
+  private get repository(): Repository<User> {
+    return AppDataSource.getRepository(User);
   }
 
-  async findAll(): Promise<Omit<User, 'password'>[]> {
-    return this.users.map(({ password, ...user }) => user);
+  async create(data: CreateUserInput): Promise<SafeUser> {
+    await this.ensureEmailAvailability(data.email);
+
+    const passwordHash = await this.hashPassword(data.password);
+
+    const user = this.repository.create({
+      name: data.name,
+      email: data.email,
+      passwordHash,
+      isAdmin: data.isAdmin ?? false,
+    });
+
+    const savedUser = await this.repository.save(user);
+    return this.toSafeUser(savedUser);
   }
 
-  async findById(id: number): Promise<Omit<User, 'password'> | null> {
-    const user = this.users.find(user => user.id === id);
+  async findAll(): Promise<SafeUser[]> {
+    const users = await this.repository.find();
+    return users.map((user) => this.toSafeUser(user));
+  }
+
+  async findById(id: number): Promise<SafeUser | null> {
+    const user = await this.repository.findOne({ where: { id } });
     if (!user) return null;
-    
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return this.toSafeUser(user);
   }
 
-  async findByEmail(emalil: string): Promise<User | null> {
-    return this.users.find(user => user.emalil === emalil) || null;
+  async findByUuid(uuid: string): Promise<SafeUser | null> {
+    const user = await this.repository.findOne({ where: { uuid } });
+    if (!user) return null;
+    return this.toSafeUser(user);
   }
 
-  async update(id: number, data: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<Omit<User, 'password'> | null> {
-    const index = this.users.findIndex(user => user.id === id);
-    if (index === -1) return null;
-
-    const currentUser = this.users[index];
-    const updatedUser = Object.assign({}, currentUser, data) as User;
-
-    this.users[index] = updatedUser;
-    const { password, ...userWithoutPassword } = updatedUser;
-    return userWithoutPassword;
+  async findByEmail(email: string): Promise<SafeUser | null> {
+    const user = await this.repository.findOne({ where: { email } });
+    if (!user) return null;
+    return this.toSafeUser(user);
   }
 
-  async delete(id: number): Promise<boolean> {
-    const index = this.users.findIndex(user => user.id === id);
-    if (index === -1) return false;
-    
-    this.users.splice(index, 1);
-    return true;
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.repository
+      .createQueryBuilder("user")
+      .addSelect("user.passwordHash")
+      .where("user.email = :email", { email })
+      .getOne();
+  }
+
+  async update(id: number, data: UpdateUserInput): Promise<SafeUser> {
+    const user = await this.repository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    if (data.email && data.email !== user.email) {
+      await this.ensureEmailAvailability(data.email, id);
+    }
+
+    const partial: Partial<User> = {};
+
+    if (data.password) {
+      partial.passwordHash = await this.hashPassword(data.password);
+    }
+
+    if (data.name !== undefined) partial.name = data.name;
+    if (data.email !== undefined) partial.email = data.email;
+    if (data.isAdmin !== undefined) partial.isAdmin = data.isAdmin;
+
+    const updated = this.repository.merge(user, partial);
+    const saved = await this.repository.save(updated);
+    return this.toSafeUser(saved);
+  }
+
+  async delete(id: number): Promise<void> {
+    const user = await this.repository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    await this.repository.remove(user);
+  }
+
+  async verifyPassword(user: User, password: string): Promise<boolean> {
+    if (!user.passwordHash) {
+      throw new Error("Senha do usuário não está disponível para verificação");
+    }
+    return bcrypt.compare(password, user.passwordHash);
+  }
+
+  toSafeUser(user: User): SafeUser {
+    const { passwordHash, ...safe } = user;
+    return safe;
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS ?? 10);
+    return bcrypt.hash(password, saltRounds);
+  }
+
+  private async ensureEmailAvailability(email: string, ignoreUserId?: number): Promise<void> {
+    const existing = await this.repository.findOne({ where: { email } });
+    if (existing && existing.id !== ignoreUserId) {
+      throw new Error("Já existe um usuário com este e-mail");
+    }
   }
 }
 
