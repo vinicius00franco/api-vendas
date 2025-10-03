@@ -16,16 +16,16 @@ class User {
   @Column({ name: "uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: "varchar" })
   email!: string;
 
-  @Column({ name: "password_hash", select: false })
+  @Column({ name: "password_hash", select: false, type: "varchar" })
   passwordHash!: string;
 
-  @Column({ name: "is_admin", default: false })
+  @Column({ name: "is_admin", default: false, type: "boolean" })
   isAdmin!: boolean;
 
   @CreateDateColumn({ name: "created_at" })

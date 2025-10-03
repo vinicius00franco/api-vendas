@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { JsonResponse } from "../../shared/http/JsonResponse.js";
-import { UserService } from "./UserService.js";
+import UserService from "./UserService.js";
 import { UserRequestDto } from "./UserRequestDto.js";
 
 class UserController {
-  private readonly userService = new UserService();
+  private userService = new UserService();
 
   async create(request: Request, response: Response) {
+    const userService = new UserService();
     const responder = JsonResponse.using(response);
     try {
       const dto = UserRequestDto.fromRequest(request);
@@ -15,9 +16,18 @@ class UserController {
         return responder.fromValidation(payload);
       }
 
-      const user = await this.userService.create(payload.data);
+      const user = await userService.create(payload.data);
 
-      return responder.created(user);
+      const responseData = {
+        uuid: user.uuid,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      return responder.created(responseData);
     } catch (error) {
       return responder.error((error as Error).message);
     }

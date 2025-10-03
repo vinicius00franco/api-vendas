@@ -4,9 +4,8 @@ import { AuthService } from "./AuthService.js";
 import { AuthRequestDto } from "./AuthRequestDto.js";
 
 class AuthController {
-  private readonly authService = new AuthService();
-
   async login(request: Request, response: Response): Promise<Response> {
+    const authService = new AuthService();
     const responder = JsonResponse.using(response);
     try {
       const dto = AuthRequestDto.fromRequest(request);
@@ -15,7 +14,7 @@ class AuthController {
         return responder.fromValidation(payload);
       }
 
-      const result = await this.authService.login(payload.data);
+      const result = await authService.login(payload.data);
       return responder.success(result);
     } catch (error) {
       return responder.error((error as Error).message, { status: 401 });

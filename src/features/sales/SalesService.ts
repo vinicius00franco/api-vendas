@@ -4,6 +4,8 @@ import { Client } from "../client/Client.js";
 import { Product } from "../product/Product.js";
 import { Sale } from "./Sale.js";
 
+export type SafeSale = Omit<Sale, "id">;
+
 export type CreateSaleInput = {
   value: number;
   discount?: number;
@@ -26,7 +28,12 @@ class SalesService {
     return AppDataSource.getRepository(Client);
   }
 
-  async create(data: CreateSaleInput): Promise<Sale> {
+  private toSafeSale(sale: Sale): SafeSale {
+    const { id, ...safe } = sale;
+    return safe;
+  }
+
+  async create(data: CreateSaleInput): Promise<SafeSale> {
     if (Number.isNaN(data.value)) {
       throw new Error("Valor da venda é obrigatório");
     }
@@ -52,11 +59,12 @@ class SalesService {
       clientId: data.clientId,
     });
 
-    return this.repository.save(sale);
+    return this.toSafeSale(await this.repository.save(sale));
   }
 
-  async findAll(): Promise<Sale[]> {
-    return this.repository.find({ relations: { product: true, client: true } });
+  async findAll(): Promise<SafeSale[]> {
+    const sales = await this.repository.find({ relations: { product: true, client: true } });
+    return sales.map(s => this.toSafeSale(s));
   }
 
   async findById(id: number): Promise<Sale | null> {
@@ -71,7 +79,7 @@ class SalesService {
     return this.repository.find({ where: { productId } });
   }
 
-  async update(id: number, data: UpdateSaleInput): Promise<Sale> {
+  async update(id: number, data: UpdateSaleInput): Promise<SafeSale> {
     const sale = await this.repository.findOne({ where: { id } });
     if (!sale) {
       throw new Error("Venda não encontrada");
@@ -104,7 +112,7 @@ class SalesService {
       discount: data.discount ?? sale.discount,
     });
 
-    return this.repository.save(updated);
+    return this.toSafeSale(await this.repository.save(updated));
   }
 
   async delete(id: number): Promise<void> {

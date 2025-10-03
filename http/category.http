@@ -1,5 +1,5 @@
-@baseUrl = http://localhost:3000
-@authToken = {{authToken}}
+@baseUrl = http://localhost:3001
+@authToken = {{AUTH_TOKEN}}
 
 ### Categories
 POST {{baseUrl}}/categories

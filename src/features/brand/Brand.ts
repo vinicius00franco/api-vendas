@@ -16,7 +16,7 @@ class Brand {
   @Column({ name: "brd_uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column({ name: "brd_name", unique: true })
+  @Column({ name: "brd_name", type: "varchar", unique: true })
   name!: string;
 
   @OneToMany(() => Product, (product: Product) => product.brand)

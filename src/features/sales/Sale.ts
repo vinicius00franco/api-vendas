@@ -24,7 +24,7 @@ class Sale {
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
   discount!: number;
 
-  @Column({ name: "product_id" })
+  @Column({ name: "product_id", type: "bigint" })
   productId!: number;
 
   // Temporary inverse side mapping adjusted; full refactor to Orders pending
@@ -35,7 +35,7 @@ class Sale {
   @JoinColumn({ name: "product_id" })
   product!: Product;
 
-  @Column({ name: "client_id" })
+  @Column({ name: "client_id", type: "bigint" })
   clientId!: number;
 
   @ManyToOne(() => Client, (client) => client.sales, {

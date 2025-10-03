@@ -34,7 +34,7 @@ class ProductRequestDto extends BaseRequestDto {
     const brandResult = this.validateInteger(this.firstValue("brandId", "brand_id"), {
       invalid: "Identificador inválido",
       missing: "Marca do produto é obrigatória",
-    }, { required: true });
+    }, { required: false });
     if (!brandResult.success) return brandResult;
 
     const priceResult = this.validateNumber(this.firstValue("price", "variant.price"), {

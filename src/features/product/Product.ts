@@ -22,13 +22,13 @@ class Product {
   @Column({ name: "pro_uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column({ name: "pro_name" })
+  @Column({ name: "pro_name", type: "varchar" })
   name!: string;
 
   @Column({ name: "pro_description", type: "text", nullable: true })
   description!: string | null;
 
-  @Column({ name: "pro_cat_id" })
+  @Column({ name: "pro_cat_id", type: "bigint" })
   categoryId!: number;
 
   @ManyToOne(() => Category, (category) => category.products, {
@@ -38,15 +38,15 @@ class Product {
   @JoinColumn({ name: "pro_cat_id" })
   category!: Category;
 
-  @Column({ name: "pro_brd_id" })
-  brandId!: number;
+  @Column({ name: "pro_brd_id", type: "bigint", nullable: true })
+  brandId!: number | null;
 
   @ManyToOne(() => Brand, (brand) => brand.products, {
-    nullable: false,
+    nullable: true,
     onDelete: "RESTRICT",
   })
   @JoinColumn({ name: "pro_brd_id" })
-  brand!: Brand;
+  brand!: Brand | null;
 
   @OneToMany(() => ProductVariant, (variant: ProductVariant) => variant.product)
   variants!: ProductVariant[];

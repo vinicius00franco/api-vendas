@@ -1,5 +1,5 @@
-@baseUrl = http://localhost:3000
-@authToken = {{authToken}}
+@baseUrl = http://localhost:3001
+@authToken = {{AUTH_TOKEN}}
 
 ### Products
 POST {{baseUrl}}/products
@@ -11,7 +11,8 @@ Authorization: Bearer {{authToken}}
   "ean": "7891234567890",
   "price": 2500.00,
   "description": "Notebook Dell Inspiron",
-  "categoryId": 1
+  "categoryId": 1,
+  "brandId": null
 }
 
 ###

@@ -6,6 +6,7 @@ import { ProductVariant } from "../../features/product/ProductVariant.js";
 import { Brand } from "../../features/brand/Brand.js";
 import { Client } from "../../features/client/Client.js";
 import { User } from "../../features/user/User.js";
+import { Sale } from "../../features/sales/Sale.js";
 
 const isTestEnv = process.env.NODE_ENV === "test";
 
@@ -20,9 +21,9 @@ const defaultPostgresConfig = {
 
 export const AppDataSource = new DataSource({
   ...(defaultPostgresConfig),
-  synchronize: false,
+  synchronize: true,
   logging: false,
-  entities: [Category, Brand, Product, ProductVariant, Client, User],
+  entities: [Category, Brand, Product, ProductVariant, Client, User, Sale],
   migrations: ["src/shared/database/migrations/*.ts"],
   ...(isTestEnv
     ? {

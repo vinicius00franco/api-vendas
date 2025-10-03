@@ -4,13 +4,24 @@ services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - .:/app
-      - /app/node_modules
+    env_file:
+      - .env
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgresql://user:password@postgres:5432/api_vendas
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=api_vendas
+      # For security, do NOT keep secrets in this file. Provide JWT_SECRET and JWT_EXPIRES_IN
+      # via host environment variables or a .env file loaded by docker-compose.
+      # Example (host):
+      #   export JWT_SECRET=your_generated_secret
+      #   export JWT_EXPIRES_IN=1d
+      # docker-compose will pass those values to the container when starting.
     depends_on:
       - postgres
     networks:
@@ -23,7 +34,7 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -35,7 +46,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - postgres
     networks:

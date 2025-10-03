@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { verify } from "jsonwebtoken";
-import { UserService, type SafeUser } from "../user/UserService.js";
+import jwt from "jsonwebtoken";
+import UserService, { type SafeUser } from "../user/UserService.js";
 
 export type TokenPayload = {
   sub: string;
@@ -40,7 +40,7 @@ export async function ensureAuthenticated(
   }
 
   try {
-    const decoded = verify(token, secret) as TokenPayload;
+  const decoded = jwt.verify(token, secret) as TokenPayload;
 
     const user = await userService.findByUuid(decoded.sub);
     if (!user) {

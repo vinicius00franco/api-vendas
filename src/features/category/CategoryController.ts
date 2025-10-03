@@ -7,6 +7,7 @@ class CategoryController {
   private readonly categoryService = new CategoryService();
 
   async create(request: Request, response: Response) {
+    const categoryService = new CategoryService();
     const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
@@ -15,7 +16,7 @@ class CategoryController {
         return responder.fromValidation(payload);
       }
 
-      const category = await this.categoryService.create(payload.data);
+      const category = await categoryService.create(payload.data);
 
       return responder.created(category);
     } catch (error) {

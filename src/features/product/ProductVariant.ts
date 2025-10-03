@@ -20,7 +20,7 @@ class ProductVariant {
   @Column({ name: "pva_uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column({ name: "pva_pro_id" })
+  @Column({ name: "pva_pro_id", type: "bigint" })
   productId!: number;
 
   @ManyToOne(() => Product, (product) => product.variants, {
@@ -30,10 +30,10 @@ class ProductVariant {
   @JoinColumn({ name: "pva_pro_id" })
   product!: Product;
 
-  @Column({ name: "pva_sku", length: 100, nullable: true, unique: true })
+  @Column({ name: "pva_sku", type: "varchar", length: 100, nullable: true, unique: true })
   sku!: string | null;
 
-  @Column({ name: "pva_ean", length: 13, nullable: true, unique: true })
+  @Column({ name: "pva_ean", type: "varchar", length: 13, nullable: true, unique: true })
   ean!: string | null;
 
   @Column({ name: "pva_price", type: "decimal", precision: 12, scale: 2 })

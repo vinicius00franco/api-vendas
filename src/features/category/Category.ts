@@ -8,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Product } from "../product/Product.js";
 
 @Entity({ name: "categories" })
 class Category {
@@ -18,10 +17,10 @@ class Category {
   @Column({ name: "cat_uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column({ name: "cat_name", unique: true })
+  @Column({ name: "cat_name", type: "varchar", unique: true })
   name!: string;
 
-  @Column({ name: "cat_description", nullable: true })
+  @Column({ name: "cat_description", type: "text", nullable: true })
   description!: string | null;
 
   @Column({ name: "cat_parent_id", type: "bigint", nullable: true })
@@ -34,8 +33,8 @@ class Category {
   @OneToMany(() => Category, (category) => category.parent)
   children!: Category[];
 
-  @OneToMany(() => Product, (product: Product) => product.category)
-  products!: Product[];
+  @OneToMany("Product", "category")
+  products!: any[];
 
   @CreateDateColumn({ name: "cat_created_at" })
   createdAt!: Date;

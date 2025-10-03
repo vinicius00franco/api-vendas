@@ -17,9 +17,13 @@ export type UpdateUserInput = Partial<{
   isAdmin: boolean;
 }>;
 
-export type SafeUser = Omit<User, "passwordHash">;
+export type SafeUser = Omit<User, "passwordHash" | "id">;
 
-class UserService {
+export default class UserService {
+  constructor() {
+    console.log("UserService instantiated");
+  }
+
   private get repository(): Repository<User> {
     return AppDataSource.getRepository(User);
   }
@@ -113,7 +117,7 @@ class UserService {
   }
 
   toSafeUser(user: User): SafeUser {
-    const { passwordHash, ...safe } = user;
+    const { id, passwordHash, ...safe } = user;
     return safe;
   }
 
@@ -129,5 +133,3 @@ class UserService {
     }
   }
 }
-
-export { UserService };

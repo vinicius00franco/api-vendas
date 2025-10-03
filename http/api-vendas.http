@@ -1,22 +1,14 @@
-@baseUrl = http://localhost:3000
-@authToken = {{authToken}}
+@baseUrl = http://localhost:3001
+@authToken = {{AUTH_TOKEN}}
 
 ### Auth - Login (sets {{authToken}})
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@email.com",
+  "email": "admin2@email.com",
   "password": "123456"
 }
-
-> {% 
-  client.test("store auth token", function() {
-    const body = response.body;
-    client.assert(body && body.data && body.data.token, "Token não retornado em data.token");
-    client.global.set("authToken", body.data.token);
-  });
-%}
 
 ### Users
 POST {{baseUrl}}/users
@@ -64,7 +56,8 @@ Authorization: Bearer {{authToken}}
   "ean": "7891234567890",
   "price": 2500.00,
   "description": "Notebook Dell Inspiron",
-  "categoryId": 1
+  "categoryId": 1,
+  "brandId": null
 }
 
 ###

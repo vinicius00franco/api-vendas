@@ -9,12 +9,14 @@ export type CreateCategoryInput = {
 
 export type UpdateCategoryInput = Partial<CreateCategoryInput>;
 
+export type SafeCategory = Omit<Category, "id">;
+
 class CategoryService {
   private get repository(): Repository<Category> {
     return AppDataSource.getRepository(Category);
   }
 
-  async create(data: CreateCategoryInput): Promise<Category> {
+  async create(data: CreateCategoryInput): Promise<SafeCategory> {
     if (!data.name) {
       throw new Error("Nome da categoria é obrigatório");
     }
@@ -29,18 +31,21 @@ class CategoryService {
       description: data.description ?? null,
     });
 
-    return this.repository.save(category);
+    const saved = await this.repository.save(category);
+    return this.toSafeCategory(saved);
   }
 
-  async findAll(): Promise<Category[]> {
-    return this.repository.find();
+  async findAll(): Promise<SafeCategory[]> {
+    const categories = await this.repository.find();
+    return categories.map(category => this.toSafeCategory(category));
   }
 
-  async findById(id: number): Promise<Category | null> {
-    return this.repository.findOne({ where: { id } });
+  async findById(id: number): Promise<SafeCategory | null> {
+    const category = await this.repository.findOne({ where: { id } });
+    return category ? this.toSafeCategory(category) : null;
   }
 
-  async update(id: number, data: UpdateCategoryInput): Promise<Category> {
+  async update(id: number, data: UpdateCategoryInput): Promise<SafeCategory> {
     const category = await this.repository.findOne({ where: { id } });
     if (!category) {
       throw new Error("Categoria não encontrada");
@@ -62,7 +67,8 @@ class CategoryService {
       description: category.description,
     });
 
-    return this.repository.save(updated);
+    const saved = await this.repository.save(updated);
+    return this.toSafeCategory(saved);
   }
 
   async delete(id: number): Promise<void> {
@@ -72,6 +78,11 @@ class CategoryService {
     }
 
     await this.repository.remove(category);
+  }
+
+  toSafeCategory(category: Category): SafeCategory {
+    const { id, ...safe } = category;
+    return safe;
   }
 }
 

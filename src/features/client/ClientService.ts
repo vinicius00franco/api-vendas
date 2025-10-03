@@ -2,6 +2,8 @@ import { Repository } from "typeorm";
 import { AppDataSource } from "../../shared/database/data-source.js";
 import { Client, type ClientAddress } from "./Client.js";
 
+export type SafeClient = Omit<Client, "id">;
+
 export type ClientAddressInput = ClientAddress;
 
 export type CreateClientInput = {
@@ -21,7 +23,12 @@ class ClientService {
     return AppDataSource.getRepository(Client);
   }
 
-  async create(data: CreateClientInput): Promise<Client> {
+  private toSafeClient(client: Client): SafeClient {
+    const { id, ...safe } = client;
+    return safe;
+  }
+
+  async create(data: CreateClientInput): Promise<SafeClient> {
     if (!data.document) {
       throw new Error("Documento do cliente é obrigatório");
     }
@@ -45,18 +52,19 @@ class ClientService {
       address: data.address,
     });
 
-    return this.repository.save(client);
+    return this.toSafeClient(await this.repository.save(client));
   }
 
-  async findAll(): Promise<Client[]> {
-    return this.repository.find();
+  async findAll(): Promise<SafeClient[]> {
+    const clients = await this.repository.find();
+    return clients.map(c => this.toSafeClient(c));
   }
 
   async findById(id: number): Promise<Client | null> {
     return this.repository.findOne({ where: { id } });
   }
 
-  async update(id: number, data: UpdateClientInput): Promise<Client> {
+  async update(id: number, data: UpdateClientInput): Promise<SafeClient> {
     const client = await this.repository.findOne({ where: { id } });
     if (!client) {
       throw new Error("Cliente não encontrado");
@@ -83,7 +91,7 @@ class ClientService {
       address: client.address,
       phone: data.phone ?? client.phone,
     });
-    return this.repository.save(updated);
+    return this.toSafeClient(await this.repository.save(updated));
   }
 
   async delete(id: number): Promise<void> {

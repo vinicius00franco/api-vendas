@@ -5,11 +5,13 @@ import { Brand } from "../brand/Brand.js";
 import { Product } from "./Product.js";
 import { ProductVariant } from "./ProductVariant.js";
 
+export type SafeProduct = Omit<Product, "id">;
+
 export type CreateProductInput = {
   name: string;
   description?: string | null;
   categoryId: number;
-  brandId: number;
+  brandId?: number;
   variant: {
     sku?: string | null;
     ean?: string | null;
@@ -31,7 +33,12 @@ class ProductService {
   private get brandRepository(): Repository<Brand> { return AppDataSource.getRepository(Brand); }
   private get variantRepository(): Repository<ProductVariant> { return AppDataSource.getRepository(ProductVariant); }
 
-  async create(data: CreateProductInput): Promise<Product> {
+  private toSafeProduct(product: Product): SafeProduct {
+    const { id, ...safe } = product;
+    return safe;
+  }
+
+  async create(data: CreateProductInput): Promise<SafeProduct> {
     if (!data.name) {
       throw new Error("Nome do produto é obrigatório");
     }
@@ -46,16 +53,19 @@ class ProductService {
       throw new Error("Categoria informada não foi encontrada");
     }
 
-    const brand = await this.brandRepository.findOne({ where: { id: data.brandId } });
-    if (!brand) {
-      throw new Error("Marca informada não foi encontrada");
+    let brand: Brand | null = null;
+    if (data.brandId) {
+      brand = await this.brandRepository.findOne({ where: { id: data.brandId } });
+      if (!brand) {
+        throw new Error("Marca informada não foi encontrada");
+      }
     }
 
     const product = this.repository.create({
       name: data.name,
       description: data.description ?? null,
       categoryId: data.categoryId,
-      brandId: data.brandId,
+      brandId: data.brandId ?? null,
     });
 
     const saved = await this.repository.save(product);
@@ -69,11 +79,14 @@ class ProductService {
     });
 
     await this.variantRepository.save(variant);
-    return this.findById(saved.id) as Promise<Product>;
+    const found = await this.findById(saved.id);
+    if (!found) throw new Error("Produto não encontrado após salvar");
+    return this.toSafeProduct(found);
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.repository.find({ relations: { category: true, brand: true, variants: true } });
+  async findAll(): Promise<SafeProduct[]> {
+    const products = await this.repository.find({ relations: { category: true, brand: true, variants: true } });
+    return products.map(p => this.toSafeProduct(p));
   }
 
   async findById(id: number): Promise<Product | null> {
@@ -82,7 +95,7 @@ class ProductService {
 
   async findByCategory(categoryId: number): Promise<Product[]> { return this.repository.find({ where: { categoryId }, relations: { variants: true, brand: true } }); }
 
-  async update(id: number, data: UpdateProductInput): Promise<Product> {
+  async update(id: number, data: UpdateProductInput): Promise<SafeProduct> {
     const product = await this.repository.findOne({ where: { id } });
     if (!product) {
       throw new Error("Produto não encontrado");
@@ -116,7 +129,7 @@ class ProductService {
       description: product.description,
     });
 
-    return this.repository.save(updated);
+    return this.toSafeProduct(await this.repository.save(updated));
   }
 
   async delete(id: number): Promise<void> {

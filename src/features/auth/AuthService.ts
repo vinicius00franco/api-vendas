@@ -1,7 +1,7 @@
-import { sign, type Secret, type SignOptions } from "jsonwebtoken";
+import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import type { StringValue } from "ms";
 import { User } from "../user/User.js";
-import { UserService, type SafeUser } from "../user/UserService.js";
+import UserService, { type SafeUser } from "../user/UserService.js";
 
 export type LoginInput = {
   email: string;
@@ -45,7 +45,7 @@ class AuthService {
       expiresIn: expiresInEnv ?? ("1d" as StringValue),
     };
 
-    return sign(
+    return jwt.sign(
       {
         sub: user.uuid,
         email: user.email,

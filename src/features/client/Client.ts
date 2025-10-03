@@ -30,16 +30,16 @@ class Client {
   @Column({ name: "uuid", type: "uuid", unique: true, default: () => "uuid_generate_v4()" })
   uuid!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   name!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: "varchar" })
   document!: string;
 
-  @Column()
+  @Column({ type: "varchar" })
   email!: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: "varchar" })
   phone!: string | null;
 
   @Column({ type: "jsonb" })
