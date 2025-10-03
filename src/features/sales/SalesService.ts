@@ -64,8 +64,14 @@ class SalesService {
     return sales.map(s => this.toSafeSale(s));
   }
 
-  async findById(id: number): Promise<Sale | null> {
-    return this.repository.findOne({ where: { id }, relations: { product: true, client: true } });
+  async findById(id: number): Promise<SafeSale | null> {
+    const sale = await this.repository.findOne({ where: { id }, relations: { product: true, client: true } });
+    return sale ? this.toSafeSale(sale) : null;
+  }
+
+  async findByUuid(uuid: string): Promise<SafeSale | null> {
+    const sale = await this.repository.findOne({ where: { uuid }, relations: { product: true, client: true } });
+    return sale ? this.toSafeSale(sale) : null;
   }
 
   async findByClient(clientId: number): Promise<Sale[]> {

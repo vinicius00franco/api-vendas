@@ -9,28 +9,14 @@ async function login(agent: any) {
   return res.body.data.token as string;
 }
 
-describe('Categories', () => {
-  it('should create category and return uuid without id', async () => {
+describe('Users', () => {
+  it('should list all users', async () => {
     await initializeDatabase();
     const agent = await getTestAgent();
     const token = await login(agent);
 
     const res = await agent
-      .post('/categories')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Periféricos', description: 'Itens de computador' })
-      .expect(201);
-
-    expect(res.body.data).toHaveProperty('uuid');
-    expect(res.body.data).not.toHaveProperty('id');
-  });
-
-  it('should list all categories', async () => {
-    const agent = await getTestAgent();
-    const token = await login(agent);
-
-    const res = await agent
-      .get('/categories')
+      .get('/users')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
@@ -41,26 +27,30 @@ describe('Categories', () => {
     }
   });
 
-  it('should get category by id', async () => {
+  it('should get user by id', async () => {
     const agent = await getTestAgent();
     const token = await login(agent);
 
-    // First create a category with unique name to avoid conflicts
+    // Get current user uuid from login response? Wait, login doesn't return user uuid.
+    // Assume admin user uuid is known or create another user.
+
+    // For now, since POST /users is allowed without auth, but GET requires auth.
+    // Let's create a user first via POST, but POST is before auth, but in test we can call it.
+
     const suffix = String(Date.now());
     const createRes = await agent
-      .post('/categories')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: `Test Category ${suffix}`, description: 'Test Desc' })
+      .post('/users')
+      .send({ name: `Test User ${suffix}`, email: `testuser${suffix}@test.com`, password: '123456' })
       .expect(201);
 
-    const categoryUuid = createRes.body.data.uuid;
+    const userUuid = createRes.body.data.uuid;
 
     const res = await agent
-      .get(`/categories/${categoryUuid}`)
+      .get(`/users/${userUuid}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
 
-    expect(res.body.data).toHaveProperty('uuid', categoryUuid);
+    expect(res.body.data).toHaveProperty('uuid', userUuid);
     expect(res.body.data).not.toHaveProperty('id');
   });
 });

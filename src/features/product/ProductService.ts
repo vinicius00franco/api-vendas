@@ -82,7 +82,7 @@ class ProductService {
     await this.variantRepository.save(variant);
     const found = await this.findById(saved.id);
     if (!found) throw new Error("Produto não encontrado após salvar");
-    return this.toSafeProduct(found);
+    return found;
   }
 
   async findAll(): Promise<SafeProduct[]> {
@@ -90,8 +90,14 @@ class ProductService {
     return products.map(p => this.toSafeProduct(p));
   }
 
-  async findById(id: number): Promise<Product | null> {
-    return this.repository.findOne({ where: { id }, relations: { category: true, brand: true, variants: true } });
+  async findById(id: number): Promise<SafeProduct | null> {
+    const product = await this.repository.findOne({ where: { id }, relations: { category: true, brand: true, variants: true } });
+    return product ? this.toSafeProduct(product) : null;
+  }
+
+  async findByUuid(uuid: string): Promise<SafeProduct | null> {
+    const product = await this.repository.findOne({ where: { uuid }, relations: { category: true, brand: true, variants: true } });
+    return product ? this.toSafeProduct(product) : null;
   }
 
   async findByCategory(categoryId: number): Promise<Product[]> { return this.repository.find({ where: { categoryId }, relations: { variants: true, brand: true } }); }

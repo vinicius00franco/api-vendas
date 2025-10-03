@@ -80,6 +80,36 @@ class ClientController {
       return responder.error((error as Error).message);
     }
   }
+
+  async getAll(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const clients = await this.clientService.findAll();
+      return responder.success(clients);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getById(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const dto = ClientRequestDto.fromRequest(request);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
+      }
+
+      const client = await this.clientService.findByUuid(uuidResult.data);
+      if (!client) {
+        return responder.error("Cliente não encontrado", { status: 404 });
+      }
+
+      return responder.success(client);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
 }
 
 export { ClientController };

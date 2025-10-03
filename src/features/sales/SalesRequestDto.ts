@@ -21,6 +21,13 @@ class SalesRequestDto extends BaseRequestDto {
     });
   }
 
+  getUuid(): ValidationResult<string> {
+    const raw = this.getParam("id");
+    if (!raw) return this.error("Identificador da venda não informado");
+    if (typeof raw !== 'string' || raw.trim() === '') return this.error("Identificador da venda inválido");
+    return this.success(raw);
+  }
+
   toCreateInput(): ValidationResult<CreateSaleInput> {
     const valueResult = this.validateNumber(
       this.firstValue("value"),

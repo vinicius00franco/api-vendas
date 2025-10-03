@@ -312,6 +312,13 @@ class ClientRequestDto {
     return validationSuccess(parsed);
   }
 
+  getUuid(): ValidationResult<string> {
+    const raw = this.params.id;
+    if (!raw) return validationError('Identificador do cliente não informado');
+    if (typeof raw !== 'string' || raw.trim() === '') return validationError('Identificador do cliente inválido');
+    return validationSuccess(raw);
+  }
+
   private parseOptionalString(value: unknown): string | undefined {
     if (value === undefined) {
       return undefined;

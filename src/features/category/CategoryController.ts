@@ -28,9 +28,9 @@ class CategoryController {
     const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -38,7 +38,7 @@ class CategoryController {
         return responder.fromValidation(payload);
       }
 
-      const category = await this.categoryService.update(idResult.data, payload.data);
+      const category = await this.categoryService.updateByUuid(uuidResult.data, payload.data);
       return responder.success(category);
     } catch (error) {
       return responder.error((error as Error).message);
@@ -49,12 +49,12 @@ class CategoryController {
     const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
-      await this.categoryService.delete(idResult.data);
+      await this.categoryService.deleteByUuid(uuidResult.data);
       return responder.noContent();
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
@@ -65,9 +65,9 @@ class CategoryController {
     const responder = JsonResponse.using(response);
     try {
       const dto = CategoryRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -75,7 +75,37 @@ class CategoryController {
         return responder.fromValidation(payload);
       }
 
-      const category = await this.categoryService.update(idResult.data, payload.data);
+      const category = await this.categoryService.updateByUuid(uuidResult.data, payload.data);
+      return responder.success(category);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getAll(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const categories = await this.categoryService.findAll();
+      return responder.success(categories);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getById(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const dto = CategoryRequestDto.fromRequest(request);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
+      }
+
+  const category = await this.categoryService.findByUuid(uuidResult.data);
+      if (!category) {
+        return responder.error("Categoria não encontrada", { status: 404 });
+      }
+
       return responder.success(category);
     } catch (error) {
       return responder.error((error as Error).message);

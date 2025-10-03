@@ -44,6 +44,11 @@ class CategoryService {
     return category ? this.toSafeCategory(category) : null;
   }
 
+  async findByUuid(uuid: string): Promise<SafeCategory | null> {
+    const category = await this.repository.findOne({ where: { uuid } });
+    return category ? this.toSafeCategory(category) : null;
+  }
+
   async update(id: number, data: UpdateCategoryInput): Promise<SafeCategory> {
     const category = await this.repository.findOne({ where: { id } });
     if (!category) {
@@ -72,6 +77,41 @@ class CategoryService {
 
   async delete(id: number): Promise<void> {
     const category = await this.repository.findOne({ where: { id } });
+    if (!category) {
+      throw new Error("Categoria não encontrada");
+    }
+
+    await this.repository.remove(category);
+  }
+
+  async updateByUuid(uuid: string, data: UpdateCategoryInput): Promise<SafeCategory> {
+    const category = await this.repository.findOne({ where: { uuid } });
+    if (!category) {
+      throw new Error("Categoria não encontrada");
+    }
+
+    if (data.name && data.name !== category.name) {
+      const existing = await this.repository.findOne({ where: { name: data.name } });
+      if (existing && existing.id !== category.id) {
+        throw new Error("Já existe uma categoria com este nome");
+      }
+    }
+
+    if (data.description !== undefined) {
+      category.description = data.description ?? null;
+    }
+
+    const updated = this.repository.merge(category, {
+      ...data,
+      description: category.description,
+    });
+
+    const saved = await this.repository.save(updated);
+    return this.toSafeCategory(saved);
+  }
+
+  async deleteByUuid(uuid: string): Promise<void> {
+    const category = await this.repository.findOne({ where: { uuid } });
     if (!category) {
       throw new Error("Categoria não encontrada");
     }

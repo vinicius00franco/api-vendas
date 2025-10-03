@@ -21,6 +21,13 @@ class ProductRequestDto extends BaseRequestDto {
     });
   }
 
+  getUuid(): ValidationResult<string> {
+    const raw = this.getParam("id");
+    if (!raw) return this.error("Identificador do produto não informado");
+    if (typeof raw !== 'string' || raw.trim() === '') return this.error("Identificador do produto inválido");
+    return this.success(raw);
+  }
+
   toCreateInput(): ValidationResult<CreateProductInput> {
     const nameResult = this.requireString(this.firstValue("name", "Name"), "Nome do produto é obrigatório");
     if (!nameResult.success) return nameResult;

@@ -61,8 +61,14 @@ class ClientService {
     return clients.map(c => this.toSafeClient(c));
   }
 
-  async findById(id: number): Promise<Client | null> {
-    return this.repository.findOne({ where: { id } });
+  async findById(id: number): Promise<SafeClient | null> {
+    const client = await this.repository.findOne({ where: { id } });
+    return client ? this.toSafeClient(client) : null;
+  }
+
+  async findByUuid(uuid: string): Promise<SafeClient | null> {
+    const client = await this.repository.findOne({ where: { uuid } });
+    return client ? this.toSafeClient(client) : null;
   }
 
   async update(id: number, data: UpdateClientInput): Promise<SafeClient> {

@@ -37,9 +37,9 @@ class UserController {
     const responder = JsonResponse.using(response);
     try {
       const dto = UserRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -47,7 +47,7 @@ class UserController {
         return responder.fromValidation(payload);
       }
 
-      const user = await this.userService.update(idResult.data, payload.data);
+      const user = await this.userService.updateByUuid(uuidResult.data, payload.data);
 
       return responder.success(user);
     } catch (error) {
@@ -59,12 +59,12 @@ class UserController {
     const responder = JsonResponse.using(response);
     try {
       const dto = UserRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
-      await this.userService.delete(idResult.data);
+      await this.userService.deleteByUuid(uuidResult.data);
       return responder.noContent();
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
@@ -75,9 +75,9 @@ class UserController {
     const responder = JsonResponse.using(response);
     try {
       const dto = UserRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -85,7 +85,37 @@ class UserController {
         return responder.fromValidation(payload);
       }
 
-      const user = await this.userService.update(idResult.data, payload.data);
+      const user = await this.userService.updateByUuid(uuidResult.data, payload.data);
+
+      return responder.success(user);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getAll(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const users = await this.userService.findAll();
+      return responder.success(users);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getById(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const dto = UserRequestDto.fromRequest(request);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
+      }
+
+      const user = await this.userService.findByUuid(uuidResult.data);
+      if (!user) {
+        return responder.error("Usuário não encontrado", { status: 404 });
+      }
 
       return responder.success(user);
     } catch (error) {

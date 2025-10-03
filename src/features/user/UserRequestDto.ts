@@ -16,18 +16,17 @@ class UserRequestDto {
     return new UserRequestDto(body, request.params ?? {});
   }
 
-  getId(): ValidationResult<number> {
+  getUuid(): ValidationResult<string> {
     const rawId = this.params.id;
     if (!rawId) {
       return validationError("Identificador do usuário não informado");
     }
 
-    const parsedId = Number(rawId);
-    if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    if (typeof rawId !== 'string' || rawId.trim() === '') {
       return validationError("Identificador do usuário inválido");
     }
 
-    return validationSuccess(parsedId);
+    return validationSuccess(rawId);
   }
 
   toCreateInput(): ValidationResult<CreateUserInput> {

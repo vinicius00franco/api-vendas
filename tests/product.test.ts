@@ -31,4 +31,49 @@ describe('Products', () => {
     expect(res.body.data).toHaveProperty('uuid');
     expect(res.body.data).not.toHaveProperty('id');
   });
+
+  it('should list all products', async () => {
+    const agent = await getTestAgent();
+    const token = await login(agent);
+
+    const res = await agent
+      .get('/products')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(Array.isArray(res.body.data)).toBe(true);
+    if (res.body.data.length > 0) {
+      expect(res.body.data[0]).toHaveProperty('uuid');
+      expect(res.body.data[0]).not.toHaveProperty('id');
+    }
+  });
+
+  it('should get product by id', async () => {
+    const agent = await getTestAgent();
+    const token = await login(agent);
+
+    // Create category
+    await agent
+      .post('/categories')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: `Test Category ${Date.now()}`, description: 'desc' })
+      .expect(201);
+
+    // Create product
+    const createRes = await agent
+      .post('/products')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: `Test Product ${Date.now()}`, price: 500.00, categoryId: 1 })
+      .expect(201);
+
+    const productUuid = createRes.body.data.uuid;
+
+    const res = await agent
+      .get(`/products/${productUuid}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(200);
+
+    expect(res.body.data).toHaveProperty('uuid', productUuid);
+    expect(res.body.data).not.toHaveProperty('id');
+  });
 });

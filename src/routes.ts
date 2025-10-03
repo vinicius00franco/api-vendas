@@ -25,24 +25,39 @@ router.put("/users/:id", userController.update.bind(userController));
 router.delete("/users/:id", userController.delete.bind(userController));
 router.patch("/users/:id", userController.patch.bind(userController));
 
+router.get("/users", userController.getAll.bind(userController));
+router.get("/users/:id", userController.getById.bind(userController));
+
 router.post("/products", productController.create.bind(productController));
 router.put("/products/:id", productController.update.bind(productController));
 router.delete("/products/:id", productController.delete.bind(productController));
 router.patch("/products/:id", productController.patch.bind(productController));
+
+router.get("/products", productController.getAll.bind(productController));
+router.get("/products/:id", productController.getById.bind(productController));
 
 router.post("/categories", categoryController.create.bind(categoryController));
 router.put("/categories/:id", categoryController.update.bind(categoryController));
 router.delete("/categories/:id", categoryController.delete.bind(categoryController));
 router.patch("/categories/:id", categoryController.patch.bind(categoryController));
 
+router.get("/categories", categoryController.getAll.bind(categoryController));
+router.get("/categories/:id", categoryController.getById.bind(categoryController));
+
 router.post("/sales", salesController.create.bind(salesController));
 router.put("/sales/:id", salesController.update.bind(salesController));
 router.delete("/sales/:id", salesController.delete.bind(salesController));
 router.patch("/sales/:id", salesController.patch.bind(salesController));
 
+router.get("/sales", salesController.getAll.bind(salesController));
+router.get("/sales/:id", salesController.getById.bind(salesController));
+
 router.post("/clients", clientController.create.bind(clientController));
 router.put("/clients/:id", clientController.update.bind(clientController));
 router.delete("/clients/:id", clientController.delete.bind(clientController));
 router.patch("/clients/:id", clientController.patch.bind(clientController));
+
+router.get("/clients", clientController.getAll.bind(clientController));
+router.get("/clients/:id", clientController.getById.bind(clientController));
 
 export { router };

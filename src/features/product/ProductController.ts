@@ -70,12 +70,41 @@ class ProductController {
         return responder.fromValidation(idResult);
       }
 
-      const updateResult = dto.toUpdateInput();
-      if (!updateResult.success) {
-        return responder.fromValidation(updateResult);
+      const payload = dto.toUpdateInput();
+      if (!payload.success) {
+        return responder.fromValidation(payload);
       }
 
-      const product = await this.productService.update(idResult.data, updateResult.data);
+      const product = await this.productService.update(idResult.data, payload.data);
+      return responder.success(product);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getAll(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const products = await this.productService.findAll();
+      return responder.success(products);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getById(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const dto = ProductRequestDto.fromRequest(request);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
+      }
+
+      const product = await this.productService.findByUuid(uuidResult.data);
+      if (!product) {
+        return responder.error("Produto não encontrado", { status: 404 });
+      }
 
       return responder.success(product);
     } catch (error) {

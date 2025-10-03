@@ -100,8 +100,42 @@ export default class UserService {
     return this.toSafeUser(saved);
   }
 
+  async updateByUuid(uuid: string, data: UpdateUserInput): Promise<SafeUser> {
+    const user = await this.repository.findOne({ where: { uuid } });
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    if (data.email && data.email !== user.email) {
+      await this.ensureEmailAvailability(data.email, user.id);
+    }
+
+    const partial: Partial<User> = {};
+
+    if (data.password) {
+      partial.passwordHash = await this.hashPassword(data.password);
+    }
+
+    if (data.name !== undefined) partial.name = data.name;
+    if (data.email !== undefined) partial.email = data.email;
+    if (data.isAdmin !== undefined) partial.isAdmin = data.isAdmin;
+
+    const updated = this.repository.merge(user, partial);
+    const saved = await this.repository.save(updated);
+    return this.toSafeUser(saved);
+  }
+
   async delete(id: number): Promise<void> {
     const user = await this.repository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    await this.repository.remove(user);
+  }
+
+  async deleteByUuid(uuid: string): Promise<void> {
+    const user = await this.repository.findOne({ where: { uuid } });
     if (!user) {
       throw new Error("Usuário não encontrado");
     }

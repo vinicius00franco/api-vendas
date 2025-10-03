@@ -80,6 +80,36 @@ class SalesController {
       return responder.error((error as Error).message);
     }
   }
+
+  async getAll(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const sales = await this.salesService.findAll();
+      return responder.success(sales);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
+
+  async getById(request: Request, response: Response) {
+    const responder = JsonResponse.using(response);
+    try {
+      const dto = SalesRequestDto.fromRequest(request);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
+      }
+
+      const sale = await this.salesService.findByUuid(uuidResult.data);
+      if (!sale) {
+        return responder.error("Venda não encontrada", { status: 404 });
+      }
+
+      return responder.success(sale);
+    } catch (error) {
+      return responder.error((error as Error).message);
+    }
+  }
 }
 
 export { SalesController };
