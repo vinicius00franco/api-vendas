@@ -110,6 +110,45 @@ class ClientService {
     await this.repository.remove(client);
   }
 
+  async updateByUuid(uuid: string, data: UpdateClientInput): Promise<SafeClient> {
+    const client = await this.repository.findOne({ where: { uuid } });
+    if (!client) {
+      throw new Error("Cliente não encontrado");
+    }
+
+    if (data.document && data.document !== client.document) {
+      const existing = await this.repository.findOne({ where: { document: data.document } });
+      if (existing && existing.uuid !== uuid) {
+        throw new Error("Já existe um cliente com este documento");
+      }
+    }
+
+    if (data.address) {
+      const mergedAddress = {
+        ...client.address,
+        ...data.address,
+      } as ClientAddress;
+      client.address = mergedAddress;
+      this.validateAddress(client.address);
+    }
+
+    const updated = this.repository.merge(client, {
+      ...data,
+      address: client.address,
+      phone: data.phone ?? client.phone,
+    });
+    return this.toSafeClient(await this.repository.save(updated));
+  }
+
+  async deleteByUuid(uuid: string): Promise<void> {
+    const client = await this.repository.findOne({ where: { uuid } });
+    if (!client) {
+      throw new Error("Cliente não encontrado");
+    }
+
+    await this.repository.remove(client);
+  }
+
   private validateAddress(address: ClientAddressInput): void {
     const requiredFields: Array<keyof ClientAddressInput> = ["street", "city", "postalCode", "country"];
 

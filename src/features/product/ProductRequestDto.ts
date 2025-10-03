@@ -38,11 +38,10 @@ class ProductRequestDto extends BaseRequestDto {
     }, { required: true });
     if (!categoryResult.success) return categoryResult;
 
-    const brandResult = this.validateInteger(this.firstValue("brandId", "brand_id"), {
-      invalid: "Identificador inválido",
-      missing: "Marca do produto é obrigatória",
-    }, { required: false });
-    if (!brandResult.success) return brandResult;
+    const brandUuid = this.optionalString(this.firstValue("brandUuid", "brand_uuid"));
+    if (!brandUuid) {
+      return this.error("Marca do produto é obrigatória");
+    }
 
     const priceResult = this.validateNumber(this.firstValue("price", "variant.price"), {
       invalid: "Valor numérico inválido",
@@ -63,7 +62,7 @@ class ProductRequestDto extends BaseRequestDto {
       name: nameResult.data,
   description: description ?? null,
       categoryId: categoryResult.data!,
-      brandId: brandResult.data!,
+      brandUuid: brandUuid,
       variant: {
         price: priceResult.data!,
         ean: ean ?? null,
@@ -115,13 +114,12 @@ class ProductRequestDto extends BaseRequestDto {
       update.categoryId = categoryResult.data;
     }
 
-    if (this.hasAnyField("brandId", "brand_id")) {
-      const brandResult = this.validateInteger(this.firstValue("brandId", "brand_id"), {
-        invalid: "Identificador inválido",
-      });
-      if (!brandResult.success) return brandResult;
-      if (brandResult.data === undefined) return this.error("Marca do produto inválida");
-  (update as any).brandId = brandResult.data;
+    if (this.hasAnyField("brandUuid", "brand_uuid")) {
+      const brandUuid = this.optionalString(this.firstValue("brandUuid", "brand_uuid"));
+      if (!brandUuid || brandUuid.trim() === '') {
+        return this.error("Marca do produto inválida");
+      }
+      (update as any).brandUuid = brandUuid;
     }
 
     if (Object.keys(update).length === 0) {

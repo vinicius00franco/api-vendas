@@ -27,9 +27,9 @@ class SalesController {
     const responder = JsonResponse.using(response);
     try {
       const dto = SalesRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -37,7 +37,7 @@ class SalesController {
         return responder.fromValidation(payload);
       }
 
-      const sale = await this.salesService.update(idResult.data, payload.data);
+      const sale = await this.salesService.updateByUuid(uuidResult.data, payload.data);
       return responder.success(sale);
     } catch (error) {
       return responder.error((error as Error).message);
@@ -48,12 +48,12 @@ class SalesController {
     const responder = JsonResponse.using(response);
     try {
       const dto = SalesRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
-      await this.salesService.delete(idResult.data);
+      await this.salesService.deleteByUuid(uuidResult.data);
       return responder.noContent();
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
@@ -64,9 +64,9 @@ class SalesController {
     const responder = JsonResponse.using(response);
     try {
       const dto = SalesRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -74,7 +74,7 @@ class SalesController {
         return responder.fromValidation(payload);
       }
 
-      const sale = await this.salesService.update(idResult.data, payload.data);
+      const sale = await this.salesService.updateByUuid(uuidResult.data, payload.data);
       return responder.success(sale);
     } catch (error) {
       return responder.error((error as Error).message);

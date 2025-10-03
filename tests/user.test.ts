@@ -53,4 +53,74 @@ describe('Users', () => {
     expect(res.body.data).toHaveProperty('uuid', userUuid);
     expect(res.body.data).not.toHaveProperty('id');
   });
+
+  it('should update user', async () => {
+    const agent = await getTestAgent();
+    const token = await login(agent);
+
+    const suffix = String(Date.now());
+    const createRes = await agent
+      .post('/users')
+      .send({ name: `Test User ${suffix}`, email: `testuser${suffix}@test.com`, password: '123456' })
+      .expect(201);
+
+    const userUuid = createRes.body.data.uuid;
+
+    const updateRes = await agent
+      .put(`/users/${userUuid}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: `Updated User ${suffix}`, email: `updated${suffix}@test.com` })
+      .expect(200);
+
+    expect(updateRes.body.data).toHaveProperty('uuid', userUuid);
+    expect(updateRes.body.data.name).toBe(`Updated User ${suffix}`);
+    expect(updateRes.body.data.email).toBe(`updated${suffix}@test.com`);
+  });
+
+  it('should patch user', async () => {
+    const agent = await getTestAgent();
+    const token = await login(agent);
+
+    const suffix = String(Date.now());
+    const createRes = await agent
+      .post('/users')
+      .send({ name: `Test User ${suffix}`, email: `testuser${suffix}@test.com`, password: '123456' })
+      .expect(201);
+
+    const userUuid = createRes.body.data.uuid;
+
+    const patchRes = await agent
+      .patch(`/users/${userUuid}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: `Patched User ${suffix}` })
+      .expect(200);
+
+    expect(patchRes.body.data).toHaveProperty('uuid', userUuid);
+    expect(patchRes.body.data.name).toBe(`Patched User ${suffix}`);
+    expect(patchRes.body.data.email).toBe(`testuser${suffix}@test.com`); // unchanged
+  });
+
+  it('should delete user', async () => {
+    const agent = await getTestAgent();
+    const token = await login(agent);
+
+    const suffix = String(Date.now());
+    const createRes = await agent
+      .post('/users')
+      .send({ name: `Test User ${suffix}`, email: `testuser${suffix}@test.com`, password: '123456' })
+      .expect(201);
+
+    const userUuid = createRes.body.data.uuid;
+
+    await agent
+      .delete(`/users/${userUuid}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(204);
+
+    // Verify deleted
+    const getRes = await agent
+      .get(`/users/${userUuid}`)
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404);
+  });
 });

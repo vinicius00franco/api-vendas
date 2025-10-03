@@ -1,23 +1,23 @@
 import { Request, Response } from "express";
 import { JsonResponse } from "../../shared/http/JsonResponse.js";
-import { ClientService } from "./ClientService.js";
-import { ClientRequestDto } from "./ClientRequestDto.js";
+import { BrandService } from "./BrandService.js";
+import { BrandRequestDto } from "./BrandRequestDto.js";
 
-class ClientController {
-  private readonly clientService = new ClientService();
+class BrandController {
+  private readonly brandService = new BrandService();
 
   async create(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const dto = ClientRequestDto.fromRequest(request);
+      const dto = BrandRequestDto.fromRequest(request);
       const payload = dto.toCreateInput();
       if (!payload.success) {
         return responder.fromValidation(payload);
       }
 
-      const client = await this.clientService.create(payload.data);
+      const brand = await this.brandService.create(payload.data);
 
-      return responder.created(client);
+      return responder.created(brand);
     } catch (error) {
       return responder.error((error as Error).message);
     }
@@ -26,7 +26,7 @@ class ClientController {
   async update(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const dto = ClientRequestDto.fromRequest(request);
+      const dto = BrandRequestDto.fromRequest(request);
       const uuidResult = dto.getUuid();
       if (!uuidResult.success) {
         return responder.fromValidation(uuidResult);
@@ -37,8 +37,8 @@ class ClientController {
         return responder.fromValidation(payload);
       }
 
-      const client = await this.clientService.updateByUuid(uuidResult.data, payload.data);
-      return responder.success(client);
+      const brand = await this.brandService.updateByUuid(uuidResult.data, payload.data);
+      return responder.success(brand);
     } catch (error) {
       return responder.error((error as Error).message);
     }
@@ -47,13 +47,13 @@ class ClientController {
   async delete(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const dto = ClientRequestDto.fromRequest(request);
+      const dto = BrandRequestDto.fromRequest(request);
       const uuidResult = dto.getUuid();
       if (!uuidResult.success) {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.clientService.deleteByUuid(uuidResult.data);
+      await this.brandService.deleteByUuid(uuidResult.data);
       return responder.noContent();
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
@@ -63,7 +63,7 @@ class ClientController {
   async patch(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const dto = ClientRequestDto.fromRequest(request);
+      const dto = BrandRequestDto.fromRequest(request);
       const uuidResult = dto.getUuid();
       if (!uuidResult.success) {
         return responder.fromValidation(uuidResult);
@@ -74,8 +74,8 @@ class ClientController {
         return responder.fromValidation(payload);
       }
 
-      const client = await this.clientService.updateByUuid(uuidResult.data, payload.data);
-      return responder.success(client);
+      const brand = await this.brandService.updateByUuid(uuidResult.data, payload.data);
+      return responder.success(brand);
     } catch (error) {
       return responder.error((error as Error).message);
     }
@@ -84,8 +84,8 @@ class ClientController {
   async getAll(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const clients = await this.clientService.findAll();
-      return responder.success(clients);
+      const brands = await this.brandService.findAll();
+      return responder.success(brands);
     } catch (error) {
       return responder.error((error as Error).message);
     }
@@ -94,22 +94,22 @@ class ClientController {
   async getById(request: Request, response: Response) {
     const responder = JsonResponse.using(response);
     try {
-      const dto = ClientRequestDto.fromRequest(request);
+      const dto = BrandRequestDto.fromRequest(request);
       const uuidResult = dto.getUuid();
       if (!uuidResult.success) {
         return responder.fromValidation(uuidResult);
       }
 
-      const client = await this.clientService.findByUuid(uuidResult.data);
-      if (!client) {
-        return responder.error("Cliente não encontrado", { status: 404 });
+      const brand = await this.brandService.findByUuid(uuidResult.data);
+      if (!brand) {
+        return responder.error("Marca não encontrada", { status: 404 });
       }
 
-      return responder.success(client);
+      return responder.success(brand);
     } catch (error) {
       return responder.error((error as Error).message);
     }
   }
 }
 
-export { ClientController };
+export { BrandController };

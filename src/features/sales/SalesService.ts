@@ -131,6 +131,51 @@ class SalesService {
     const sales = await this.repository.find();
     return sales.reduce((total, sale) => total + (Number(sale.value) - Number(sale.discount)), 0);
   }
+
+  async updateByUuid(uuid: string, data: UpdateSaleInput): Promise<SafeSale> {
+    const sale = await this.repository.findOne({ where: { uuid } });
+    if (!sale) {
+      throw new Error("Venda não encontrada");
+    }
+
+    if (data.value !== undefined && Number.isNaN(data.value)) {
+      throw new Error("Valor inválido");
+    }
+
+    if (data.discount !== undefined && Number.isNaN(data.discount)) {
+      throw new Error("Desconto inválido");
+    }
+
+    if (data.productId && data.productId !== sale.productId) {
+      const product = await this.productRepository.findOne({ where: { id: data.productId } });
+      if (!product) {
+        throw new Error("Produto informado não foi encontrado");
+      }
+    }
+
+    if (data.clientId && data.clientId !== sale.clientId) {
+      const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+      if (!client) {
+        throw new Error("Cliente informado não foi encontrado");
+      }
+    }
+
+    const updated = this.repository.merge(sale, {
+      ...data,
+      discount: data.discount ?? sale.discount,
+    });
+
+    return this.toSafeSale(await this.repository.save(updated));
+  }
+
+  async deleteByUuid(uuid: string): Promise<void> {
+    const sale = await this.repository.findOne({ where: { uuid } });
+    if (!sale) {
+      throw new Error("Venda não encontrada");
+    }
+
+    await this.repository.remove(sale);
+  }
 }
 
 export { SalesService };

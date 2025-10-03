@@ -10,6 +10,7 @@ import { AuthController, ensureAuthenticated } from "./features/auth/index.js";
 const userController = new UserController();
 const productController = new ProductController();
 const categoryController = new CategoryController();
+const brandController = new BrandController();
 const salesController = new SalesController();
 const clientController = new ClientController();
 const authController = new AuthController();
@@ -43,6 +44,14 @@ router.patch("/categories/:id", categoryController.patch.bind(categoryController
 
 router.get("/categories", categoryController.getAll.bind(categoryController));
 router.get("/categories/:id", categoryController.getById.bind(categoryController));
+
+router.post("/brands", brandController.create.bind(brandController));
+router.put("/brands/:id", brandController.update.bind(brandController));
+router.delete("/brands/:id", brandController.delete.bind(brandController));
+router.patch("/brands/:id", brandController.patch.bind(brandController));
+
+router.get("/brands", brandController.getAll.bind(brandController));
+router.get("/brands/:id", brandController.getById.bind(brandController));
 
 router.post("/sales", salesController.create.bind(salesController));
 router.put("/sales/:id", salesController.update.bind(salesController));

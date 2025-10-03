@@ -27,9 +27,9 @@ class ProductController {
     const responder = JsonResponse.using(response);
     try {
       const dto = ProductRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const updateResult = dto.toUpdateInput();
@@ -37,7 +37,7 @@ class ProductController {
         return responder.fromValidation(updateResult);
       }
 
-      const product = await this.productService.update(idResult.data, updateResult.data);
+      const product = await this.productService.updateByUuid(uuidResult.data, updateResult.data);
 
       return responder.success(product);
     } catch (error) {
@@ -49,12 +49,12 @@ class ProductController {
     const responder = JsonResponse.using(response);
     try {
       const dto = ProductRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
-      await this.productService.delete(idResult.data);
+      await this.productService.deleteByUuid(uuidResult.data);
       return responder.noContent();
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
@@ -65,9 +65,9 @@ class ProductController {
     const responder = JsonResponse.using(response);
     try {
       const dto = ProductRequestDto.fromRequest(request);
-      const idResult = dto.getId();
-      if (!idResult.success) {
-        return responder.fromValidation(idResult);
+      const uuidResult = dto.getUuid();
+      if (!uuidResult.success) {
+        return responder.fromValidation(uuidResult);
       }
 
       const payload = dto.toUpdateInput();
@@ -75,7 +75,7 @@ class ProductController {
         return responder.fromValidation(payload);
       }
 
-      const product = await this.productService.update(idResult.data, payload.data);
+      const product = await this.productService.updateByUuid(uuidResult.data, payload.data);
       return responder.success(product);
     } catch (error) {
       return responder.error((error as Error).message);

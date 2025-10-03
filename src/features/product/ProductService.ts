@@ -12,7 +12,7 @@ export type CreateProductInput = {
   name: string;
   description?: string | null;
   categoryId: number;
-  brandId?: number;
+  brandUuid?: string;
   variant: {
     sku?: string | null;
     ean?: string | null;
@@ -22,7 +22,7 @@ export type CreateProductInput = {
 };
 
 export type UpdateProductInput = Partial<Omit<CreateProductInput, "variant">> & {
-  brandId?: number;
+  brandUuid?: string;
 };
 
 class ProductService {
@@ -44,6 +44,10 @@ class ProductService {
       throw new Error("Nome do produto é obrigatório");
     }
 
+    if (!data.brandUuid) {
+      throw new Error("Marca do produto é obrigatória");
+    }
+
     const existing = await this.repository.findOne({ where: { name: data.name } });
     if (existing) {
       throw new Error("Já existe um produto com este nome");
@@ -55,18 +59,20 @@ class ProductService {
     }
 
     let brand: Brand | null = null;
-    if (data.brandId) {
-      brand = await this.brandRepository.findOne({ where: { id: data.brandId } });
+    let brandId: number | null = null;
+    if (data.brandUuid) {
+      brand = await this.brandRepository.findOne({ where: { uuid: data.brandUuid } });
       if (!brand) {
         throw new Error("Marca informada não foi encontrada");
       }
+      brandId = brand.id;
     }
 
     const product = this.repository.create({
       name: data.name,
       description: data.description ?? null,
       categoryId: data.categoryId,
-      brandId: data.brandId ?? null,
+      brandId: brandId,
     });
 
     const saved = await this.repository.save(product);
@@ -122,11 +128,13 @@ class ProductService {
       }
     }
 
-    if ((data as any).brandId && (data as any).brandId !== product.brandId) {
-      const brand = await this.brandRepository.findOne({ where: { id: (data as any).brandId } });
+    let brandId: number | undefined;
+    if ((data as any).brandUuid) {
+      const brand = await this.brandRepository.findOne({ where: { uuid: (data as any).brandUuid } });
       if (!brand) {
         throw new Error("Marca informada não foi encontrada");
       }
+      brandId = brand.id;
     }
 
     if (data.description !== undefined) { product.description = data.description ?? null; }
@@ -134,6 +142,7 @@ class ProductService {
     const updated = this.repository.merge(product, {
       ...data,
       description: product.description,
+      ...(brandId !== undefined && { brandId }),
     });
 
     return this.toSafeProduct(await this.repository.save(updated));
@@ -141,6 +150,55 @@ class ProductService {
 
   async delete(id: number): Promise<void> {
     const product = await this.repository.findOne({ where: { id } });
+    if (!product) {
+      throw new Error("Produto não encontrado");
+    }
+
+    await this.repository.remove(product);
+  }
+
+  async updateByUuid(uuid: string, data: UpdateProductInput): Promise<SafeProduct> {
+    const product = await this.repository.findOne({ where: { uuid } });
+    if (!product) {
+      throw new Error("Produto não encontrado");
+    }
+
+    if (data.name && data.name !== product.name) {
+      const existing = await this.repository.findOne({ where: { name: data.name } });
+      if (existing && existing.uuid !== uuid) {
+        throw new Error("Já existe um produto com este nome");
+      }
+    }
+
+    if (data.categoryId && data.categoryId !== product.categoryId) {
+      const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+      if (!category) {
+        throw new Error("Categoria informada não foi encontrada");
+      }
+    }
+
+    let brandId: number | undefined;
+    if ((data as any).brandUuid) {
+      const brand = await this.brandRepository.findOne({ where: { uuid: (data as any).brandUuid } });
+      if (!brand) {
+        throw new Error("Marca informada não foi encontrada");
+      }
+      brandId = brand.id;
+    }
+
+    if (data.description !== undefined) { product.description = data.description ?? null; }
+
+    const updated = this.repository.merge(product, {
+      ...data,
+      description: product.description,
+      ...(brandId !== undefined && { brandId }),
+    });
+
+    return this.toSafeProduct(await this.repository.save(updated));
+  }
+
+  async deleteByUuid(uuid: string): Promise<void> {
+    const product = await this.repository.findOne({ where: { uuid } });
     if (!product) {
       throw new Error("Produto não encontrado");
     }
