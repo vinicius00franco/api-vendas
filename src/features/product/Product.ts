@@ -9,9 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Category } from "../category/Category.js";
-import { Brand } from "../brand/Brand.js";
-import { ProductVariant } from "./ProductVariant.js";
+// use string-based relations to avoid ESM circular init issues in tests
 
 @Entity({ name: "products" })
 @Index(["name"], { unique: true })
@@ -31,25 +29,25 @@ class Product {
   @Column({ name: "pro_cat_id", type: "bigint" })
   categoryId!: number;
 
-  @ManyToOne(() => Category, (category) => category.products, {
+  @ManyToOne("Category", (category: any) => category.products, {
     nullable: false,
     onDelete: "RESTRICT",
   })
   @JoinColumn({ name: "pro_cat_id" })
-  category!: Category;
+  category!: any;
 
   @Column({ name: "pro_brd_id", type: "bigint", nullable: true })
   brandId!: number | null;
 
-  @ManyToOne(() => Brand, (brand) => brand.products, {
+  @ManyToOne("Brand", (brand: any) => brand.products, {
     nullable: true,
     onDelete: "RESTRICT",
   })
   @JoinColumn({ name: "pro_brd_id" })
-  brand!: Brand | null;
+  brand!: any | null;
 
-  @OneToMany(() => ProductVariant, (variant: ProductVariant) => variant.product)
-  variants!: ProductVariant[];
+  @OneToMany("ProductVariant", (variant: any) => variant.product)
+  variants!: any[];
 
   @CreateDateColumn({ name: "pro_created_at" })
   createdAt!: Date;

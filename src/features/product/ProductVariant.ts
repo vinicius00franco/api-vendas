@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Product } from "./Product.js";
+// avoid eager evaluation to prevent circular init during tests
 
 @Entity({ name: "product_variants" })
 @Index(["sku"], { unique: true })
@@ -23,12 +23,12 @@ class ProductVariant {
   @Column({ name: "pva_pro_id", type: "bigint" })
   productId!: number;
 
-  @ManyToOne(() => Product, (product) => product.variants, {
+  @ManyToOne("Product", (product: any) => product.variants, {
     nullable: false,
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "pva_pro_id" })
-  product!: Product;
+  product!: any;
 
   @Column({ name: "pva_sku", type: "varchar", length: 100, nullable: true, unique: true })
   sku!: string | null;

@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../shared/database/data-source.js";
+import { repo } from "../../shared/database/transaction-context.js";
 import { Category } from "./Category.js";
 
 export type CreateCategoryInput = {
@@ -12,9 +13,7 @@ export type UpdateCategoryInput = Partial<CreateCategoryInput>;
 export type SafeCategory = Omit<Category, "id">;
 
 class CategoryService {
-  private get repository(): Repository<Category> {
-    return AppDataSource.getRepository(Category);
-  }
+  private get repository(): Repository<Category> { return repo<Category>(Category); }
 
   async create(data: CreateCategoryInput): Promise<SafeCategory> {
     if (!data.name) {

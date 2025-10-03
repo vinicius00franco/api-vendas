@@ -9,7 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-  "types": ["node", "express"],
+  "types": ["node", "express", "jest"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -36,11 +36,15 @@
     "strict": true,
     "jsx": "react-jsx",
     "verbatimModuleSyntax": false, 
-    "isolatedModules": true,
+  "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
-  }
+  },
+  "ts-jest": {
+    "useESM": true
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts", "jest.config.ts"]
 }

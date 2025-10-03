@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../shared/database/data-source.js";
+import { repo } from "../../shared/database/transaction-context.js";
 import { Client } from "../client/Client.js";
 import { Product } from "../product/Product.js";
 import { Sale } from "./Sale.js";
@@ -17,16 +18,12 @@ export type UpdateSaleInput = Partial<CreateSaleInput>;
 
 class SalesService {
   private get repository(): Repository<Sale> {
-    return AppDataSource.getRepository(Sale);
+    return repo<Sale>(Sale);
   }
 
-  private get productRepository(): Repository<Product> {
-    return AppDataSource.getRepository(Product);
-  }
+  private get productRepository(): Repository<Product> { return repo<Product>(Product); }
 
-  private get clientRepository(): Repository<Client> {
-    return AppDataSource.getRepository(Client);
-  }
+  private get clientRepository(): Repository<Client> { return repo<Client>(Client); }
 
   private toSafeSale(sale: Sale): SafeSale {
     const { id, ...safe } = sale;

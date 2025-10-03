@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../shared/database/data-source.js";
+import { repo } from "../../shared/database/transaction-context.js";
 import { Client, type ClientAddress } from "./Client.js";
 
 export type SafeClient = Omit<Client, "id">;
@@ -20,7 +21,7 @@ export type UpdateClientInput = Partial<Omit<CreateClientInput, "address">> & {
 
 class ClientService {
   private get repository(): Repository<Client> {
-    return AppDataSource.getRepository(Client);
+    return repo<Client>(Client);
   }
 
   private toSafeClient(client: Client): SafeClient {

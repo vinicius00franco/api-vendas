@@ -1,13 +1,6 @@
 import "reflect-metadata";
-import express from "express";
-import { router } from "./routes.js";
+import { app } from "./app.js";
 import { initializeDatabase } from "./shared/database/data-source.js";
-
-const app = express();
-
-app.use(express.json());
-
-app.use(router);
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 

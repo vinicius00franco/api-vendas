@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Client } from "../client/Client.js";
-import { Product } from "../product/Product.js";
+// use string-based relations to avoid ESM circular init issues in tests
 
 @Entity({ name: "sales" })
 class Sale {
@@ -28,22 +27,22 @@ class Sale {
   productId!: number;
 
   // Temporary inverse side mapping adjusted; full refactor to Orders pending
-  @ManyToOne(() => Product, (product) => product.variants, {
+  @ManyToOne("Product", (product: any) => product.variants, {
     nullable: false,
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "product_id" })
-  product!: Product;
+  product!: any;
 
   @Column({ name: "client_id", type: "bigint" })
   clientId!: number;
 
-  @ManyToOne(() => Client, (client) => client.sales, {
+  @ManyToOne("Client", (client: any) => client.sales, {
     nullable: false,
     onDelete: "CASCADE",
   })
   @JoinColumn({ name: "client_id" })
-  client!: Client;
+  client!: any;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;

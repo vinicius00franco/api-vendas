@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../shared/database/data-source.js";
+import { repo } from "../../shared/database/transaction-context.js";
 import { Category } from "../category/Category.js";
 import { Brand } from "../brand/Brand.js";
 import { Product } from "./Product.js";
@@ -26,12 +27,12 @@ export type UpdateProductInput = Partial<Omit<CreateProductInput, "variant">> & 
 
 class ProductService {
   private get repository(): Repository<Product> {
-    return AppDataSource.getRepository(Product);
+    return repo<Product>(Product);
   }
 
-  private get categoryRepository(): Repository<Category> { return AppDataSource.getRepository(Category); }
-  private get brandRepository(): Repository<Brand> { return AppDataSource.getRepository(Brand); }
-  private get variantRepository(): Repository<ProductVariant> { return AppDataSource.getRepository(ProductVariant); }
+  private get categoryRepository(): Repository<Category> { return repo<Category>(Category); }
+  private get brandRepository(): Repository<Brand> { return repo<Brand>(Brand); }
+  private get variantRepository(): Repository<ProductVariant> { return repo<ProductVariant>(ProductVariant); }
 
   private toSafeProduct(product: Product): SafeProduct {
     const { id, ...safe } = product;

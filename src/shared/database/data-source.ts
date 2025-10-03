@@ -24,7 +24,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [Category, Brand, Product, ProductVariant, Client, User, Sale],
-  migrations: ["src/shared/database/migrations/*.ts"],
+  migrations: [],
   ...(isTestEnv
     ? {
         database: process.env.DB_NAME ?? "api_vendas_test",

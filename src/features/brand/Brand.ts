@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Product } from "../product/Product.js";
+// relation target referenced by string to avoid circular init during tests
 
 @Entity({ name: "brands" })
 class Brand {
@@ -19,8 +19,8 @@ class Brand {
   @Column({ name: "brd_name", type: "varchar", unique: true })
   name!: string;
 
-  @OneToMany(() => Product, (product: Product) => product.brand)
-  products!: Product[];
+  @OneToMany("Product", (product: any) => product.brand)
+  products!: any[];
 
   @CreateDateColumn({ name: "brd_created_at" })
   createdAt!: Date;
