@@ -64,8 +64,8 @@ class UserController {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.userService.deleteByUuid(uuidResult.data);
-      return responder.noContent();
+      const deletedUuid = await this.userService.deleteByUuid(uuidResult.data);
+      return responder.success({ message: `Usuário com UUID ${deletedUuid} foi deletado com sucesso` });
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
     }

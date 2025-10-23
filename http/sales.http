@@ -1,32 +1,107 @@
 @baseUrl = http://localhost:3001
-@authToken = {{AUTH_TOKEN}}
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+@saleUuid = b3f2f334-ec0f-485c-859d-ab2c5db1ca29
+@productUuid1 = 567240d6-761f-45dd-a1c6-127ca1a3a7fd
+@productUuid2 = 0cb2539e-5bc8-4bbd-9069-7bf15cc7af77
 
-### Sales
+@clientUuid1 = 3db6f6d0-6884-44fd-bd8d-eae787db0c31
+
+
+
+### Sales - Venda de Arroz
 POST {{baseUrl}}/sales
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "value": 2500.00,
-  "discount": 100.00,
-  "productId": 1,
-  "clientId": 1
+  "value": 31.00,
+  "discount": 0.00,
+  "productUuid": "{{productUuid1}}",
+  "clientUuid": "{{clientUuid1}}"
+}
+
+### Sales - Venda de Feijão
+POST {{baseUrl}}/sales
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "value": 17.80,
+  "discount": 1.00,
+  "productUuid": "{{productUuid2}}",
+  "clientUuid": "{{clientUuid1}}"
+}
+
+### Sales - Venda de Milho
+POST {{baseUrl}}/sales
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "value": 9.00,
+  "discount": 0.50,
+  "productUuid": "{{productUuid3}}",
+  "clientUuid": "{{clientUuid1}}"
+}
+
+### Sales - Venda de Soja
+POST {{baseUrl}}/sales
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "value": 24.00,
+  "discount": 2.00,
+  "productUuid": "{{productUuid4}}",
+  "clientUuid": "{{clientUuid1}}"
+}
+
+### Sales - Venda de Trigo
+POST {{baseUrl}}/sales
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "value": 13.60,
+  "discount": 0.00,
+  "productUuid": "{{productUuid5}}",
+  "clientUuid": "{{clientUuid1}}"
+}
+
+### Sales - Venda Múltipla (Arroz + Feijão)
+POST {{baseUrl}}/sales
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "value": 48.80,
+  "discount": 3.00,
+  "productUuid": "{{productUuid1}}",
+  "clientUuid": "{{clientUuid2}}"
 }
 
 ###
-PUT {{baseUrl}}/sales/1
+GET {{baseUrl}}/sales
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/sales/{{saleUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/sales/{{saleUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "value": 3000.00,
   "discount": 200.00,
-  "productId": 1,
-  "clientId": 1
+  "productUuid": "{{productUuid1}}",
+  "clientUuid": "{{clientUuid1}}"
 }
 
 ###
-PATCH {{baseUrl}}/sales/1
+PATCH {{baseUrl}}/sales/{{saleUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -35,5 +110,5 @@ Authorization: Bearer {{authToken}}
 }
 
 ###
-DELETE {{baseUrl}}/sales/1
+DELETE {{baseUrl}}/sales/{{saleUuid}}
 Authorization: Bearer {{authToken}}

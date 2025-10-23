@@ -54,8 +54,8 @@ class CategoryController {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.categoryService.deleteByUuid(uuidResult.data);
-      return responder.noContent();
+      const deletedUuid = await this.categoryService.deleteByUuid(uuidResult.data);
+      return responder.success({ message: `Categoria com UUID ${deletedUuid} foi deletada com sucesso` });
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
     }

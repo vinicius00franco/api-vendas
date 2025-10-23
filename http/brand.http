@@ -1,0 +1,44 @@
+@baseUrl = http://localhost:3001
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+@brandUuid = ec9c8f22-0124-4dad-8f0d-487fd8d28984
+
+### Brands - Marca Agrícola
+POST {{baseUrl}}/brands
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "AgroBrasil",
+  "description": "Marca especializada em produtos agrícolas brasileiros"
+}
+
+###
+GET {{baseUrl}}/brands
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/brands/{{brandUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/brands/{{brandUuid}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "AgroBrasil Premium",
+  "description": "Produtos agrícolas premium do Brasil"
+}
+
+###
+PATCH {{baseUrl}}/brands/{{brandUuid}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "description": "Especialistas em grãos e cereais brasileiros"
+}
+
+###
+DELETE {{baseUrl}}/brands/{{brandUuid}}
+Authorization: Bearer {{authToken}}

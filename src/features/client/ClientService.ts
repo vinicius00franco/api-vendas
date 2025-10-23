@@ -140,13 +140,14 @@ class ClientService {
     return this.toSafeClient(await this.repository.save(updated));
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const client = await this.repository.findOne({ where: { uuid } });
     if (!client) {
       throw new Error("Cliente não encontrado");
     }
 
     await this.repository.remove(client);
+    return uuid;
   }
 
   private validateAddress(address: ClientAddressInput): void {

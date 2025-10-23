@@ -53,8 +53,8 @@ class BrandController {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.brandService.deleteByUuid(uuidResult.data);
-      return responder.noContent();
+      const deletedUuid = await this.brandService.deleteByUuid(uuidResult.data);
+      return responder.success({ message: `Marca com UUID ${deletedUuid} foi deletada com sucesso` });
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
     }

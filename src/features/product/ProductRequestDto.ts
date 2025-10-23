@@ -32,11 +32,10 @@ class ProductRequestDto extends BaseRequestDto {
     const nameResult = this.requireString(this.firstValue("name", "Name"), "Nome do produto é obrigatório");
     if (!nameResult.success) return nameResult;
 
-    const categoryResult = this.validateInteger(this.firstValue("categoryId", "category_id"), {
-      invalid: "Identificador inválido",
-      missing: "Categoria do produto é obrigatória",
-    }, { required: true });
-    if (!categoryResult.success) return categoryResult;
+    const categoryUuid = this.optionalString(this.firstValue("categoryUuid", "category_uuid"));
+    if (!categoryUuid) {
+      return this.error("Categoria do produto é obrigatória");
+    }
 
     const brandUuid = this.optionalString(this.firstValue("brandUuid", "brand_uuid"));
     if (!brandUuid) {
@@ -61,7 +60,7 @@ class ProductRequestDto extends BaseRequestDto {
     const createInput: CreateProductInput = {
       name: nameResult.data,
   description: description ?? null,
-      categoryId: categoryResult.data!,
+      categoryUuid: categoryUuid,
       brandUuid: brandUuid,
       variant: {
         price: priceResult.data!,
@@ -98,20 +97,12 @@ class ProductRequestDto extends BaseRequestDto {
       }
     }
 
-    if (this.hasAnyField("categoryId", "category_id")) {
-      const categoryResult = this.validateInteger(
-        this.firstValue("categoryId", "category_id"),
-        {
-          invalid: "Identificador inválido",
-        }
-      );
-      if (!categoryResult.success) {
-        return categoryResult;
-      }
-      if (categoryResult.data === undefined) {
+    if (this.hasAnyField("categoryUuid", "category_uuid")) {
+      const categoryUuid = this.optionalString(this.firstValue("categoryUuid", "category_uuid"));
+      if (!categoryUuid || categoryUuid.trim() === '') {
         return this.error("Categoria do produto inválida");
       }
-      update.categoryId = categoryResult.data;
+      (update as any).categoryUuid = categoryUuid;
     }
 
     if (this.hasAnyField("brandUuid", "brand_uuid")) {

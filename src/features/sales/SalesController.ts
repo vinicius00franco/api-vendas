@@ -53,8 +53,8 @@ class SalesController {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.salesService.deleteByUuid(uuidResult.data);
-      return responder.noContent();
+      const deletedUuid = await this.salesService.deleteByUuid(uuidResult.data);
+      return responder.success({ message: `Venda com UUID ${deletedUuid} foi deletada com sucesso` });
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
     }

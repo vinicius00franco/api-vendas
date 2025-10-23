@@ -54,8 +54,8 @@ class ProductController {
         return responder.fromValidation(uuidResult);
       }
 
-      await this.productService.deleteByUuid(uuidResult.data);
-      return responder.noContent();
+      const deletedUuid = await this.productService.deleteByUuid(uuidResult.data);
+      return responder.success({ message: `Produto com UUID ${deletedUuid} foi deletado com sucesso` });
     } catch (error) {
       return responder.error((error as Error).message, { status: 404 });
     }

@@ -1,5 +1,6 @@
 @baseUrl = http://localhost:3001
-@authToken = {{AUTH_TOKEN}}
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+@clientUuid = 3db6f6d0-6884-44fd-bd8d-eae787db0c31
 
 ### Clients
 POST {{baseUrl}}/clients
@@ -7,48 +8,56 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Maria Silva",
+  "name": "João da Fazenda",
   "document": "12345678901",
-  "email": "maria@email.com",
+  "email": "joao@fazenda.com",
   "phone": "+55 11 99999-9999",
   "address": {
-    "street": "Rua das Flores",
+    "street": "Estrada Rural São João",
     "number": "123",
-    "city": "São Paulo",
+    "city": "Ribeirão Preto",
     "state": "SP",
-    "postalCode": "01234-567",
+    "postalCode": "14000-000",
     "country": "BR"
   }
 }
 
 ###
-PUT {{baseUrl}}/clients/1
+GET {{baseUrl}}/clients
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/clients/{{clientUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/clients/{{clientUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Maria Santos",
+  "name": "João Santos da Fazenda",
   "document": "12345678901",
-  "email": "maria.santos@email.com",
+  "email": "joao.santos@fazenda.com",
   "address": {
-    "street": "Av. Paulista",
+    "street": "Rodovia Anhanguera",
     "number": "456",
-    "city": "São Paulo",
+    "city": "Ribeirão Preto",
     "state": "SP",
-    "postalCode": "01310-100",
+    "postalCode": "14020-000",
     "country": "BR"
   }
 }
 
 ###
-PATCH {{baseUrl}}/clients/1
+PATCH {{baseUrl}}/clients/{{clientUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "email": "maria.nova@email.com"
+  "email": "joao.novo@fazenda.com"
 }
 
 ###
-DELETE {{baseUrl}}/clients/1
+DELETE {{baseUrl}}/clients/{{clientUuid}}
 Authorization: Bearer {{authToken}}

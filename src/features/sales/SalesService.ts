@@ -10,11 +10,16 @@ export type SafeSale = Omit<Sale, "id">;
 export type CreateSaleInput = {
   value: number;
   discount?: number;
-  productId: number;
-  clientId: number;
+  productUuid: string;
+  clientUuid: string;
 };
 
-export type UpdateSaleInput = Partial<CreateSaleInput>;
+export type UpdateSaleInput = Partial<{
+  value: number;
+  discount: number;
+  productUuid: string;
+  clientUuid: string;
+}>;
 
 class SalesService {
   private get repository(): Repository<Sale> {
@@ -39,12 +44,12 @@ class SalesService {
       throw new Error("Desconto inválido");
     }
 
-    const product = await this.productRepository.findOne({ where: { id: data.productId } });
+    const product = await this.productRepository.findOne({ where: { uuid: data.productUuid } });
     if (!product) {
       throw new Error("Produto informado não foi encontrado");
     }
 
-    const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+    const client = await this.clientRepository.findOne({ where: { uuid: data.clientUuid } });
     if (!client) {
       throw new Error("Cliente informado não foi encontrado");
     }
@@ -52,8 +57,8 @@ class SalesService {
     const sale = this.repository.create({
       value: data.value,
       discount: data.discount ?? 0,
-      productId: data.productId,
-      clientId: data.clientId,
+      productId: product.id,
+      clientId: client.id,
     });
 
     return this.toSafeSale(await this.repository.save(sale));
@@ -96,23 +101,29 @@ class SalesService {
       throw new Error("Desconto inválido");
     }
 
-    if (data.productId && data.productId !== sale.productId) {
-      const product = await this.productRepository.findOne({ where: { id: data.productId } });
+    let productId = sale.productId;
+    if (data.productUuid) {
+      const product = await this.productRepository.findOne({ where: { uuid: data.productUuid } });
       if (!product) {
         throw new Error("Produto informado não foi encontrado");
       }
+      productId = product.id;
     }
 
-    if (data.clientId && data.clientId !== sale.clientId) {
-      const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+    let clientId = sale.clientId;
+    if (data.clientUuid) {
+      const client = await this.clientRepository.findOne({ where: { uuid: data.clientUuid } });
       if (!client) {
         throw new Error("Cliente informado não foi encontrado");
       }
+      clientId = client.id;
     }
 
     const updated = this.repository.merge(sale, {
-      ...data,
+      value: data.value ?? sale.value,
       discount: data.discount ?? sale.discount,
+      productId,
+      clientId,
     });
 
     return this.toSafeSale(await this.repository.save(updated));
@@ -146,35 +157,42 @@ class SalesService {
       throw new Error("Desconto inválido");
     }
 
-    if (data.productId && data.productId !== sale.productId) {
-      const product = await this.productRepository.findOne({ where: { id: data.productId } });
+    let productId = sale.productId;
+    if (data.productUuid) {
+      const product = await this.productRepository.findOne({ where: { uuid: data.productUuid } });
       if (!product) {
         throw new Error("Produto informado não foi encontrado");
       }
+      productId = product.id;
     }
 
-    if (data.clientId && data.clientId !== sale.clientId) {
-      const client = await this.clientRepository.findOne({ where: { id: data.clientId } });
+    let clientId = sale.clientId;
+    if (data.clientUuid) {
+      const client = await this.clientRepository.findOne({ where: { uuid: data.clientUuid } });
       if (!client) {
         throw new Error("Cliente informado não foi encontrado");
       }
+      clientId = client.id;
     }
 
     const updated = this.repository.merge(sale, {
-      ...data,
+      value: data.value ?? sale.value,
       discount: data.discount ?? sale.discount,
+      productId,
+      clientId,
     });
 
     return this.toSafeSale(await this.repository.save(updated));
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const sale = await this.repository.findOne({ where: { uuid } });
     if (!sale) {
       throw new Error("Venda não encontrada");
     }
 
     await this.repository.remove(sale);
+    return uuid;
   }
 }
 

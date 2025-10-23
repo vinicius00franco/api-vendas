@@ -1,19 +1,36 @@
 @baseUrl = http://localhost:3001
-@authToken = {{authToken}}
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+
+### Auth - Login (define {{authToken}})
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "vinicius@email.com",
+  "password": "123456"
+}
 
 ### Users
 POST {{baseUrl}}/users
 Content-Type: application/json
 
 {
-  "name": "João Silva",
-  "email": "joao@email.com",
+  "name": "Vinicius Franco",
+  "email": "vinicius@email.com",
   "admin": false,
   "password": "123456"
 }
 
 ###
-PUT {{baseUrl}}/users/1
+GET {{baseUrl}}/users
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/users/{{userUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/users/{{userUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -25,14 +42,14 @@ Authorization: Bearer {{authToken}}
 }
 
 ###
-PATCH {{baseUrl}}/users/1
+PATCH {{baseUrl}}/users/{{userUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "admin": true
+  "name": "Vinicius Franco "
 }
 
 ###
-DELETE {{baseUrl}}/users/1
+DELETE {{baseUrl}}/users/{{userUuid}}
 Authorization: Bearer {{authToken}}

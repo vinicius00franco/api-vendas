@@ -1,42 +1,110 @@
 @baseUrl = http://localhost:3001
-@authToken = {{AUTH_TOKEN}}
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+@productUuid = 5012c533-a08b-42bd-98ed-069e40a75f3a
+@brandUuid = ec9c8f22-0124-4dad-8f0d-487fd8d28984
+@categoryUuid = 9f3d9b5d-1ca5-4fda-a33a-dd943bfd2629
 
-### Products
+### Products - Arroz
 POST {{baseUrl}}/products
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Notebook Dell",
-  "ean": "7891234567890",
-  "price": 2500.00,
-  "description": "Notebook Dell Inspiron",
-  "categoryId": 1,
-  "brandId": null
+  "name": "Arroz Branco Tipo 1",
+  "ean": "7891234567891",
+  "price": 15.50,
+  "description": "Arroz branco de alta qualidade, 5kg",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
 }
 
-###
-PUT {{baseUrl}}/products/1
+### Products - Feijão
+POST {{baseUrl}}/products
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Notebook Dell XPS",
-  "ean": "7891234567890",
-  "price": 3500.00,
-  "description": "Notebook Dell XPS 13",
-  "categoryId": 1
+  "name": "Feijão Carioca",
+  "ean": "7891234567892",
+  "price": 8.90,
+  "description": "Feijão carioca selecionado, 1kg",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
 }
 
-###
-PATCH {{baseUrl}}/products/1
+### Products - Milho
+POST {{baseUrl}}/products
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "price": 3000.00
+  "name": "Milho Verde em Lata",
+  "ean": "7891234567893",
+  "price": 4.50,
+  "description": "Milho verde em conserva, 200g",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
+}
+
+### Products - Soja
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Farinha de Soja",
+  "ean": "7891234567894",
+  "price": 12.00,
+  "description": "Farinha de soja integral, 500g",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
+}
+
+### Products - Trigo
+POST {{baseUrl}}/products
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Farinha de Trigo",
+  "ean": "7891234567895",
+  "price": 6.80,
+  "description": "Farinha de trigo para pães, 1kg",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
 }
 
 ###
-DELETE {{baseUrl}}/products/1
+GET {{baseUrl}}/products
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/products/{{productUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/products/{{productUuid}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "name": "Arroz Integral Premium",
+  "ean": "7891234567890",
+  "price": 18.50,
+  "description": "Arroz integral orgânico, 5kg",
+  "categoryUuid": "{{categoryUuid}}",
+  "brandUuid": "{{brandUuid}}"
+}
+
+###
+PATCH {{baseUrl}}/products/{{productUuid}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "price": 17.00
+}
+
+###
+DELETE {{baseUrl}}/products/{{productUuid}}
 Authorization: Bearer {{authToken}}

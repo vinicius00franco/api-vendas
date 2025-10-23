@@ -110,13 +110,14 @@ class CategoryService {
     return this.toSafeCategory(saved);
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const category = await this.repository.findOne({ where: { uuid } });
     if (!category) {
       throw new Error("Categoria não encontrada");
     }
 
     await this.repository.remove(category);
+    return uuid;
   }
 
   toSafeCategory(category: Category): SafeCategory {

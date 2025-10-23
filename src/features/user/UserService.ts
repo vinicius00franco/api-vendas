@@ -134,13 +134,14 @@ export default class UserService {
     await this.repository.remove(user);
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const user = await this.repository.findOne({ where: { uuid } });
     if (!user) {
       throw new Error("Usuário não encontrado");
     }
 
     await this.repository.remove(user);
+    return uuid;
   }
 
   async verifyPassword(user: User, password: string): Promise<boolean> {

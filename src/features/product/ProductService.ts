@@ -11,7 +11,7 @@ export type SafeProduct = Omit<Product, "id">;
 export type CreateProductInput = {
   name: string;
   description?: string | null;
-  categoryId: number;
+  categoryUuid: string;
   brandUuid?: string;
   variant: {
     sku?: string | null;
@@ -53,7 +53,7 @@ class ProductService {
       throw new Error("Já existe um produto com este nome");
     }
 
-    const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+    const category = await this.categoryRepository.findOne({ where: { uuid: data.categoryUuid } });
     if (!category) {
       throw new Error("Categoria informada não foi encontrada");
     }
@@ -71,7 +71,7 @@ class ProductService {
     const product = this.repository.create({
       name: data.name,
       description: data.description ?? null,
-      categoryId: data.categoryId,
+      categoryId: category.id,
       brandId: brandId,
     });
 
@@ -109,7 +109,7 @@ class ProductService {
   async findByCategory(categoryId: number): Promise<Product[]> { return this.repository.find({ where: { categoryId }, relations: { variants: true, brand: true } }); }
 
   async update(id: number, data: UpdateProductInput): Promise<SafeProduct> {
-    const product = await this.repository.findOne({ where: { id } });
+    const product = await this.repository.findOne({ where: { id }, relations: { category: true, brand: true } });
     if (!product) {
       throw new Error("Produto não encontrado");
     }
@@ -121,11 +121,12 @@ class ProductService {
       }
     }
 
-    if (data.categoryId && data.categoryId !== product.categoryId) {
-      const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+    if (data.categoryUuid) {
+      const category = await this.categoryRepository.findOne({ where: { uuid: data.categoryUuid } });
       if (!category) {
         throw new Error("Categoria informada não foi encontrada");
       }
+      product.categoryId = category.id;
     }
 
     let brandId: number | undefined;
@@ -158,7 +159,7 @@ class ProductService {
   }
 
   async updateByUuid(uuid: string, data: UpdateProductInput): Promise<SafeProduct> {
-    const product = await this.repository.findOne({ where: { uuid } });
+    const product = await this.repository.findOne({ where: { uuid }, relations: { category: true, brand: true } });
     if (!product) {
       throw new Error("Produto não encontrado");
     }
@@ -170,11 +171,12 @@ class ProductService {
       }
     }
 
-    if (data.categoryId && data.categoryId !== product.categoryId) {
-      const category = await this.categoryRepository.findOne({ where: { id: data.categoryId } });
+    if (data.categoryUuid) {
+      const category = await this.categoryRepository.findOne({ where: { uuid: data.categoryUuid } });
       if (!category) {
         throw new Error("Categoria informada não foi encontrada");
       }
+      product.categoryId = category.id;
     }
 
     let brandId: number | undefined;
@@ -197,13 +199,14 @@ class ProductService {
     return this.toSafeProduct(await this.repository.save(updated));
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const product = await this.repository.findOne({ where: { uuid } });
     if (!product) {
       throw new Error("Produto não encontrado");
     }
 
     await this.repository.remove(product);
+    return uuid;
   }
 }
 

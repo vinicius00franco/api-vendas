@@ -1,35 +1,45 @@
 @baseUrl = http://localhost:3001
-@authToken = {{AUTH_TOKEN}}
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNTU0ZGFiZS1jOTliLTRiNmItOGE3Ny1mYmYwNTcxOWExZGEiLCJlbWFpbCI6InZpbmljaXVzQGVtYWlsLmNvbSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3NjEyNTk3MzEsImV4cCI6MTc2MTM0NjEzMX0.jonoHXCkSPoUc402d6bQiC-apocBZBx2I8qsNdo1IAI
+@categoryUuid = 9f3d9b5d-1ca5-4fda-a33a-dd943bfd2629
 
-### Categories
+
+### Categories - Alimentos Agrícolas
 POST {{baseUrl}}/categories
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Eletrônicos",
-  "description": "Produtos eletrônicos"
+  "name": "Alimentos Agrícolas",
+  "description": "Produtos agrícolas como grãos, cereais e derivados"
 }
 
 ###
-PUT {{baseUrl}}/categories/1
+GET {{baseUrl}}/categories
+Authorization: Bearer {{authToken}}
+
+###
+GET {{baseUrl}}/categories/{{categoryUuid}}
+Authorization: Bearer {{authToken}}
+
+###
+PUT {{baseUrl}}/categories/{{categoryUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "name": "Informática",
-  "description": "Produtos de informática"
+  "name": "Produtos Agrícolas",
+  "description": "Grãos, cereais e alimentos de origem agrícola"
 }
 
 ###
-PATCH {{baseUrl}}/categories/1
+PATCH {{baseUrl}}/categories/{{categoryUuid}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "description": "Equipamentos de informática"
+  "description": "Itens agrícolas para consumo e produção"
 }
 
 ###
-DELETE {{baseUrl}}/categories/1
+DELETE {{baseUrl}}/categories/{{categoryUuid}}
 Authorization: Bearer {{authToken}}

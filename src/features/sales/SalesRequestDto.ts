@@ -41,28 +41,14 @@ class SalesRequestDto extends BaseRequestDto {
       return valueResult;
     }
 
-    const productIdResult = this.validateInteger(
-      this.firstValue("productId", "product_id"),
-      {
-        invalid: "Identificador inválido",
-        missing: "Produto da venda é obrigatório",
-      },
-      { required: true }
-    );
-    if (!productIdResult.success) {
-      return productIdResult;
+    const productUuidResult = this.requireString(this.firstValue("productUuid", "product_uuid"), "UUID do produto é obrigatório");
+    if (!productUuidResult.success) {
+      return productUuidResult;
     }
 
-    const clientIdResult = this.validateInteger(
-      this.firstValue("clientId", "client_id"),
-      {
-        invalid: "Identificador inválido",
-        missing: "Cliente da venda é obrigatório",
-      },
-      { required: true }
-    );
-    if (!clientIdResult.success) {
-      return clientIdResult;
+    const clientUuidResult = this.requireString(this.firstValue("clientUuid", "client_uuid"), "UUID do cliente é obrigatório");
+    if (!clientUuidResult.success) {
+      return clientUuidResult;
     }
 
     const discountResult = this.validateNumber(this.firstValue("discount"), {
@@ -74,8 +60,8 @@ class SalesRequestDto extends BaseRequestDto {
 
     const createInput: CreateSaleInput = {
       value: valueResult.data!,
-      productId: productIdResult.data!,
-      clientId: clientIdResult.data!,
+      productUuid: productUuidResult.data,
+      clientUuid: clientUuidResult.data,
     };
 
     if (discountResult.data !== undefined) {
@@ -114,30 +100,20 @@ class SalesRequestDto extends BaseRequestDto {
       update.discount = discountResult.data;
     }
 
-    if (this.hasAnyField("productId", "product_id")) {
-      const productIdResult = this.validateInteger(this.firstValue("productId", "product_id"), {
-        invalid: "Identificador inválido",
-      });
-      if (!productIdResult.success) {
-        return productIdResult;
+    if (this.hasAnyField("productUuid", "product_uuid")) {
+      const productUuid = this.requireString(this.firstValue("productUuid", "product_uuid"), "UUID do produto inválido");
+      if (!productUuid.success) {
+        return productUuid;
       }
-      if (productIdResult.data === undefined) {
-        return this.error("Produto inválido");
-      }
-      update.productId = productIdResult.data;
+      (update as any).productUuid = productUuid.data;
     }
 
-    if (this.hasAnyField("clientId", "client_id")) {
-      const clientIdResult = this.validateInteger(this.firstValue("clientId", "client_id"), {
-        invalid: "Identificador inválido",
-      });
-      if (!clientIdResult.success) {
-        return clientIdResult;
+    if (this.hasAnyField("clientUuid", "client_uuid")) {
+      const clientUuid = this.requireString(this.firstValue("clientUuid", "client_uuid"), "UUID do cliente inválido");
+      if (!clientUuid.success) {
+        return clientUuid;
       }
-      if (clientIdResult.data === undefined) {
-        return this.error("Cliente inválido");
-      }
-      update.clientId = clientIdResult.data;
+      (update as any).clientUuid = clientUuid.data;
     }
 
     if (Object.keys(update).length === 0) {

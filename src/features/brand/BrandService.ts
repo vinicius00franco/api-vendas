@@ -3,7 +3,7 @@ import { AppDataSource } from "../../shared/database/data-source.js";
 import { repo } from "../../shared/database/transaction-context.js";
 import { Brand } from "./Brand.js";
 
-export type SafeBrand = Omit<Brand, "never">; // Keep all fields including id for now
+export type SafeBrand = Omit<Brand, 'id'>; // Omit id from responses
 
 export type CreateBrandInput = {
   name: string;
@@ -18,7 +18,8 @@ class BrandService {
   }
 
   private toSafeBrand(brand: Brand): SafeBrand {
-    return brand; // Return full brand with id
+    const { id, ...safe } = brand;
+    return safe;
   }
 
   async create(data: CreateBrandInput): Promise<SafeBrand> {
@@ -96,13 +97,14 @@ class BrandService {
     return this.toSafeBrand(await this.repository.save(updated));
   }
 
-  async deleteByUuid(uuid: string): Promise<void> {
+  async deleteByUuid(uuid: string): Promise<string> {
     const brand = await this.repository.findOne({ where: { uuid } });
     if (!brand) {
       throw new Error("Marca não encontrada");
     }
 
     await this.repository.remove(brand);
+    return uuid;
   }
 }
 
