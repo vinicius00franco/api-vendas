@@ -1,0 +1,67 @@
+@startuml categories_diagram
+title Diagrama de Classes - Endpoint Categories
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class CategoryController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class CategoryRequestDto {
+        +fromRequest(request: Request): CategoryRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateCategoryInput>
+        +toUpdateInput(): ValidationResult<UpdateCategoryInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class CategoryService {
+        +create(data: CreateCategoryInput): Promise<SafeCategory>
+        +findAll(): Promise<SafeCategory[]>
+        +findById(id: number): Promise<SafeCategory | null>
+        +findByUuid(uuid: string): Promise<SafeCategory | null>
+        +update(id: number, data: UpdateCategoryInput): Promise<SafeCategory>
+        +updateByUuid(uuid: string, data: UpdateCategoryInput): Promise<SafeCategory>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        --
+        -toSafeCategory(category: Category): SafeCategory
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class Category {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class SafeCategory {
+        +uuid: string
+        +name: string
+        +description: string | null
+        +createdAt: Date
+        +updatedAt: Date
+    }
+}
+
+' Relationships
+CategoryController --> CategoryRequestDto : uses
+CategoryController --> CategoryService : uses
+CategoryRequestDto --> CategoryService : provides validated data
+CategoryService --> Category : persists/retrieves
+CategoryService --> SafeCategory : returns
+
+note right of SafeCategory : SafeCategory = Omit<Category, 'id'>\nExposes UUID externally,\nuses ID internally
+@enduml

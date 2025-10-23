@@ -1,0 +1,67 @@
+@startuml brands_diagram
+title Diagrama de Classes - Endpoint Brands
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class BrandController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class BrandRequestDto {
+        +fromRequest(request: Request): BrandRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateBrandInput>
+        +toUpdateInput(): ValidationResult<UpdateBrandInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class BrandService {
+        +create(data: CreateBrandInput): Promise<SafeBrand>
+        +findAll(): Promise<SafeBrand[]>
+        +findById(id: number): Promise<SafeBrand | null>
+        +findByUuid(uuid: string): Promise<SafeBrand | null>
+        +update(id: number, data: UpdateBrandInput): Promise<SafeBrand>
+        +updateByUuid(uuid: string, data: UpdateBrandInput): Promise<SafeBrand>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        --
+        -toSafeBrand(brand: Brand): SafeBrand
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class Brand {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class SafeBrand {
+        +uuid: string
+        +name: string
+        +description: string | null
+        +createdAt: Date
+        +updatedAt: Date
+    }
+}
+
+' Relationships
+BrandController --> BrandRequestDto : uses
+BrandController --> BrandService : uses
+BrandRequestDto --> BrandService : provides validated data
+BrandService --> Brand : persists/retrieves
+BrandService --> SafeBrand : returns
+
+note right of SafeBrand : SafeBrand = Omit<Brand, 'id'>\nExposes UUID externally,\nuses ID internally
+@enduml

@@ -1,0 +1,105 @@
+@startuml sales_diagram
+title Diagrama de Classes - Endpoint Sales
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class SalesController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class SalesRequestDto {
+        +fromRequest(request: Request): SalesRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateSaleInput>
+        +toUpdateInput(): ValidationResult<UpdateSaleInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class SalesService {
+        +create(data: CreateSaleInput): Promise<SafeSale>
+        +findAll(): Promise<SafeSale[]>
+        +findById(id: number): Promise<SafeSale | null>
+        +findByUuid(uuid: string): Promise<SafeSale | null>
+        +update(id: number, data: UpdateSaleInput): Promise<SafeSale>
+        +updateByUuid(uuid: string, data: UpdateSaleInput): Promise<SafeSale>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        --
+        -toSafeSale(sale: Sale): SafeSale
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class Sale {
+        -id: number
+        +uuid: string
+        +value: number
+        +discount: number
+        +productId: number
+        +clientId: number
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class Product {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+
+    class Client {
+        -id: number
+        +uuid: string
+        +name: string
+        +document: string
+        +email: string
+    }
+
+    class SafeSale {
+        +uuid: string
+        +value: number
+        +discount: number
+        +product: SafeProduct
+        +client: SafeClient
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class SafeProduct {
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+
+    class SafeClient {
+        +uuid: string
+        +name: string
+        +document: string
+        +email: string
+    }
+}
+
+' Relationships
+SalesController --> SalesRequestDto : uses
+SalesController --> SalesService : uses
+SalesRequestDto --> SalesService : provides validated data
+SalesService --> Sale : persists/retrieves
+SalesService --> Product : references
+SalesService --> Client : references
+Sale --> Product : belongs to
+Sale --> Client : belongs to
+SafeSale --> SafeProduct : has
+SafeSale --> SafeClient : has
+SalesService --> SafeSale : returns
+
+note right of SafeSale : SafeSale = Omit<Sale, 'id'> + relations\nUses productUuid/clientUuid externally,\nproductId/clientId internally
+@enduml

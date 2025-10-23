@@ -1,0 +1,85 @@
+@startuml clients_diagram
+title Diagrama de Classes - Endpoint Clients
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class ClientController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class ClientRequestDto {
+        +fromRequest(request: Request): ClientRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateClientInput>
+        +toUpdateInput(): ValidationResult<UpdateClientInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class ClientService {
+        +create(data: CreateClientInput): Promise<SafeClient>
+        +findAll(): Promise<SafeClient[]>
+        +findById(id: number): Promise<SafeClient | null>
+        +findByUuid(uuid: string): Promise<SafeClient | null>
+        +update(id: number, data: UpdateClientInput): Promise<SafeClient>
+        +updateByUuid(uuid: string, data: UpdateClientInput): Promise<SafeClient>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        --
+        -toSafeClient(client: Client): SafeClient
+        -validateAddress(address: ClientAddressInput): void
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class Client {
+        -id: number
+        +uuid: string
+        +name: string
+        +document: string
+        +email: string
+        +phone: string | null
+        +address: ClientAddress
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class ClientAddress {
+        +street: string
+        +number: string
+        +city: string
+        +state: string
+        +postalCode: string
+        +country: string
+    }
+
+    class SafeClient {
+        +uuid: string
+        +name: string
+        +document: string
+        +email: string
+        +phone: string | null
+        +address: ClientAddress
+        +createdAt: Date
+        +updatedAt: Date
+    }
+}
+
+' Relationships
+ClientController --> ClientRequestDto : uses
+ClientController --> ClientService : uses
+ClientRequestDto --> ClientService : provides validated data
+ClientService --> Client : persists/retrieves
+Client --> ClientAddress : has
+SafeClient --> ClientAddress : has
+ClientService --> SafeClient : returns
+
+note right of SafeClient : SafeClient = Omit<Client, 'id'>\nExposes UUID externally,\nuses ID internally
+@enduml

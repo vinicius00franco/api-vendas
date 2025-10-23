@@ -1,0 +1,118 @@
+@startuml products_diagram
+title Diagrama de Classes - Endpoint Products
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class ProductController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class ProductRequestDto {
+        +fromRequest(request: Request): ProductRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateProductInput>
+        +toUpdateInput(): ValidationResult<UpdateProductInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class ProductService {
+        +create(data: CreateProductInput): Promise<SafeProduct>
+        +findAll(): Promise<SafeProduct[]>
+        +findById(id: number): Promise<SafeProduct | null>
+        +findByUuid(uuid: string): Promise<SafeProduct | null>
+        +update(id: number, data: UpdateProductInput): Promise<SafeProduct>
+        +updateByUuid(uuid: string, data: UpdateProductInput): Promise<SafeProduct>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        --
+        -toSafeProduct(product: Product): SafeProduct
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class Product {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+        +categoryId: number
+        +brandId: number
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class ProductVariant {
+        -id: number
+        +productId: number
+        +sku: string | null
+        +ean: string | null
+        +price: number
+        +stockQuantity: number
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class Category {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+
+    class Brand {
+        -id: number
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+
+    class SafeProduct {
+        +uuid: string
+        +name: string
+        +description: string | null
+        +category: SafeCategory
+        +brand: SafeBrand
+        +variants: ProductVariant[]
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class SafeCategory {
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+
+    class SafeBrand {
+        +uuid: string
+        +name: string
+        +description: string | null
+    }
+}
+
+' Relationships
+ProductController --> ProductRequestDto : uses
+ProductController --> ProductService : uses
+ProductRequestDto --> ProductService : provides validated data
+ProductService --> Product : persists/retrieves
+ProductService --> ProductVariant : manages
+ProductService --> Category : references
+ProductService --> Brand : references
+Product --> ProductVariant : has many
+Product --> Category : belongs to
+Product --> Brand : belongs to
+SafeProduct --> SafeCategory : has
+SafeProduct --> SafeBrand : has
+SafeProduct --> ProductVariant : has many
+ProductService --> SafeProduct : returns
+
+note right of SafeProduct : SafeProduct = Omit<Product, 'id'> + relations\nUses categoryUuid/brandUuid externally,\ncategoryId/brandId internally
+@enduml

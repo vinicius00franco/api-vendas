@@ -1,0 +1,76 @@
+@startuml users_diagram
+title Diagrama de Classes - Endpoint Users
+left to right direction
+
+package "Presentation Layer" as PL #LightBlue {
+    class UserController {
+        +create(request: Request, response: Response): Promise<void>
+        +update(request: Request, response: Response): Promise<void>
+        +delete(request: Request, response: Response): Promise<void>
+        +patch(request: Request, response: Response): Promise<void>
+        +getAll(request: Request, response: Response): Promise<void>
+        +getById(request: Request, response: Response): Promise<void>
+    }
+}
+
+package "DTO Layer" as DTO #LightYellow {
+    class UserRequestDto {
+        +fromRequest(request: Request): UserRequestDto
+        +getUuid(): ValidationResult<string>
+        +toCreateInput(): ValidationResult<CreateUserInput>
+        +toUpdateInput(): ValidationResult<UpdateUserInput>
+    }
+}
+
+package "Business Layer" as BL #LightGreen {
+    class UserService {
+        +create(data: CreateUserInput): Promise<SafeUser>
+        +findAll(): Promise<SafeUser[]>
+        +findById(id: number): Promise<SafeUser | null>
+        +findByUuid(uuid: string): Promise<SafeUser | null>
+        +findByEmail(email: string): Promise<SafeUser | null>
+        +findByEmailWithPassword(email: string): Promise<User | null>
+        +update(id: number, data: UpdateUserInput): Promise<SafeUser>
+        +updateByUuid(uuid: string, data: UpdateUserInput): Promise<SafeUser>
+        +delete(id: number): Promise<void>
+        +deleteByUuid(uuid: string): Promise<string>
+        +verifyPassword(user: User, password: string): Promise<boolean>
+        --
+        -toSafeUser(user: User): SafeUser
+        -hashPassword(password: string): Promise<string>
+        -ensureEmailAvailability(email: string, ignoreUserId?: number): Promise<void>
+    }
+}
+
+package "Data Layer" as DL #LightCoral {
+    class User {
+        -id: number
+        +uuid: string
+        +name: string
+        +email: string
+        -passwordHash: string
+        +isAdmin: boolean
+        +createdAt: Date
+        +updatedAt: Date
+    }
+
+    class SafeUser {
+        +uuid: string
+        +name: string
+        +email: string
+        +isAdmin: boolean
+        +createdAt: Date
+        +updatedAt: Date
+    }
+}
+
+' Relationships
+UserController --> UserRequestDto : uses
+UserController --> UserService : uses
+UserRequestDto --> UserService : provides validated data
+UserService --> User : persists/retrieves
+UserService --> SafeUser : returns
+
+note right of SafeUser : SafeUser = Omit<User, 'id' | 'passwordHash'>\nPassword is hashed and never exposed
+note right of User : passwordHash is private and hashed
+@enduml
